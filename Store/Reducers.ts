@@ -1,14 +1,15 @@
-export default (
-  state = {
-    user: {},
-    massege: { status: "", massege: "" },
-    product: {},
-    cart: [],
-    theme: "light",
-    filter: [],
-  },
-  action
-) => {
+import { State, Action } from "./types";
+
+const initialState: State = {
+  user: {},
+  massege: { status: "", massege: "" },
+  product: {},
+  cart: [],
+  theme: "light",
+  filter: [],
+};
+
+export default (state: State = initialState, action: Action): State => {
   switch (action.type) {
     case "USER_DETAIL":
       return { ...state, user: action.payload };

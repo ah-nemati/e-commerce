@@ -1,36 +1,47 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, FC, ChangeEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SetFilter } from "../../Store/Actions";
+import { Product, State } from "../../Store/types";
 
-export const PriceRange = () => {
-  const [minvalue, setMinValue] = useState(0);
-  const [maxvalue, setMaxValue] = useState(100000000);
+export const PriceRange: FC = () => {
+  const [minvalue, setMinValue] = useState<number>(0);
+  const [maxvalue, setMaxValue] = useState<number>(100000000);
   const minGap = 0;
   const dispatch = useDispatch();
-  const { product } = useSelector((state) => state.product);
+  const product = useSelector((state: State) => state.product);
+
+  const handleMinChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setMinValue(Number(e.target.value));
+  };
+
+  const handleMaxChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setMaxValue(Number(e.target.value));
+  };
 
   useEffect(() => {
+    if (maxvalue - minvalue < minGap) {
+      setMinValue(maxvalue - minGap);
+      setMaxValue(minvalue + minGap);
+    }
+
     if (product) {
       dispatch(
         SetFilter(
           product.filter(
-            (item) => item.price/10 <= maxvalue && item.price/10 >= minvalue
+            (item: Product) =>
+              item.price / 10 <= maxvalue && item.price / 10 >= minvalue
           )
         )
       );
     }
-    if (maxvalue - minvalue <= minGap) {
-      setMaxValue(parseInt(minvalue) - minGap);
+
+    const sliderTrack = document.getElementById("slider-track");
+    if (sliderTrack) {
+      const per1 = (minvalue / 100000000) * 100;
+      const per2 = (maxvalue / 100000000) * 100;
+      sliderTrack.style.background = `linear-gradient(to left, #e0e5e6 ${per1}%,#19bfd3 ${per1}%,#19bfd3 ${per2}%,#e0e5e6 ${per2}%)`;
     }
-    if (maxvalue - minvalue <= minGap) {
-      setMinValue(parseInt(maxvalue) + minGap);
-    }
-    const per1 = (minvalue / 100000000) * 100;
-    const per2 = (maxvalue / 100000000) * 100;
-    document.getElementById(
-      "slider-track"
-    ).style.background = `linear-gradient(to left, #e0e5e6 ${per1}%,#19bfd3 ${per1}%,#19bfd3 ${per2}%,#e0e5e6 ${per2}%)`;
-  }, [minvalue, maxvalue]);
+  }, [minvalue, maxvalue, product, dispatch, minGap]);
 
   return (
     <>
@@ -39,7 +50,7 @@ export const PriceRange = () => {
         <input
           type="text"
           className="flex text-left text-sm outline-none shadow-none p-2 border-b dark:border-none dark:w-10/12 font-bold text-gray-800 rounded dark:bg-slate-800 dark:text-white w-11/12"
-          onChange={(e) => setMinValue(e.target.value)}
+          onChange={handleMinChange}
           value={minvalue}
         />
         <span className="text-base mr-1">تومان</span>
@@ -49,7 +60,7 @@ export const PriceRange = () => {
         <input
           type="text"
           className="flex text-left outline-none shadow-none p-2 border-b dark:border-none dark:w-10/12 font-bold text-sm text-gray-800 rounded dark:bg-slate-800 dark:text-white w-11/12"
-          onChange={(e) => setMaxValue(e.target.value)}
+          onChange={handleMaxChange}
           value={maxvalue}
         />
         <span className="text-base mr-1">تومان</span>
@@ -63,18 +74,16 @@ export const PriceRange = () => {
               min="0"
               max="100000000"
               value={minvalue}
-              name=""
-              id=""
-              onChange={(e) => setMinValue(e.target.value)}
+              id="min-range"
+              onChange={handleMinChange}
             />
             <input
               type="range"
               min="0"
               max="100000000"
               value={maxvalue}
-              name=""
-              id=""
-              onChange={(e) => setMaxValue(e.target.value)}
+              id="max-range"
+              onChange={handleMaxChange}
             />
           </div>
           <div className="flex justify-between w-full text-xs text-gray-500 mt-3 pb-5">

@@ -3,14 +3,20 @@ import { ProductItem } from "./ProductItem";
 import Filter from "./Filter";
 import { ProductLoad } from "./ProductLoad";
 import { useSelector } from "react-redux";
+import { State, Product } from "../../Store/types";
 
-export const Products = ({ product }) => {
-  const [mostvisited, setmostvisited] = useState(true);
-  const [cheapest, setcheapest] = useState(false);
-  const [mostexpensive, setmostexpensive] = useState(false);
-  const [mostpopular, setmostpopular] = useState(false);
-  const [productItem, setproductItem] = useState([]);
-  const { theme } = useSelector((state) => state);
+interface Props {
+  product: Product[];
+}
+
+export const Products: React.FC<Props> = ({ product }) => {
+  const [mostvisited, setmostvisited] = useState<boolean>(true);
+  const [cheapest, setcheapest] = useState<boolean>(false);
+  const [mostexpensive, setmostexpensive] = useState<boolean>(false);
+  const [mostpopular, setmostpopular] = useState<boolean>(false);
+  const [productItem, setproductItem] = useState<Product[]>([]);
+  const { theme } = useSelector((state: State) => state);
+
   useEffect(() => {
     if (mostexpensive) {
       return setproductItem(
@@ -21,7 +27,7 @@ export const Products = ({ product }) => {
     if (mostvisited) {
       return setproductItem(
         product
-          ? [...product].sort((a, b) => b.rating.count - a.rating.count)
+          ? [...product].sort((a: any, b: any) => b.rating.count - a.rating.count)
           : []
       );
     }
@@ -35,7 +41,7 @@ export const Products = ({ product }) => {
     if (mostpopular) {
       return setproductItem(
         product
-          ? [...product].sort((a, b) => b.rating.rate - a.rating.rate)
+          ? [...product].sort((a: any, b: any) => b.rating.rate - a.rating.rate)
           : []
       );
     }
@@ -44,7 +50,7 @@ export const Products = ({ product }) => {
   return (
     <div className="flex justify-center md:p-14 p-2 bg-gray-100 dark:bg-slate-800">
       <div className="xl:flex hidden w-full xl:w-1/4 h-fit xl:sticky xl:top-24">
-        <Filter product={product} />
+        <Filter />
       </div>
       <div className="flex flex-col w-full xl:w-3/4 gap-4">
         <div className="flex gap-3 dark:bg-slate-900 dark:text-white text-gray-500 bg-white rounded p-3 items-center">
@@ -166,7 +172,7 @@ export const Products = ({ product }) => {
         </div>
         <div className="flex flex-row custom:flex-col sm:flex-wrap">
           {productItem.length > 0 ? (
-            productItem.map((item) => (
+            productItem.map((item: any) => (
               <ProductItem product={item} key={item.id} />
             ))
           ) : (

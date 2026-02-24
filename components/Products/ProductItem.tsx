@@ -4,27 +4,54 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import PersianNumber from "../../Hooks/PersianNumber";
 import { AddToCart, Notify } from "../../Store/Actions";
+import { State, CartItem } from "../../Store/types";
 
-export const ProductItem = ({ product }) => {
-  const cartProduct = useSelector((state) => state.cart);
+// Based on the usage in this component, the product prop has a more detailed structure
+// than the Product type in Store/types.ts.
+interface ProductProp {
+  id: string;
+  images: {
+    url: string[];
+  };
+  data_layer: {
+    brand: string;
+  };
+  colors: {
+    id: React.Key;
+    hex_code: string;
+  }[];
+  title_fa: string;
+  rating: {
+    rate: number;
+    count: number;
+  };
+  price: number;
+}
+
+interface Props {
+  product: ProductProp;
+}
+
+export const ProductItem: React.FC<Props> = ({ product }) => {
+  const cartProduct = useSelector((state: State) => state.cart);
   const dispatch = useDispatch();
 
-  const whiteSpace = (title) => {
-    let str = "";
-    for (let index = 0; index < title.length; index++) {
-      if (index < 50) {
-        str += title[index];
-      } else return (str += "...");
+  const whiteSpace = (title: string): string => {
+    if (title.length > 50) {
+      return title.substring(0, 50) + "...";
     }
-    return str;
+    return title;
   };
 
-  const handleAddToCart = () => {
-    const duble = cartProduct.filter((item) => item.id === product.id);
-    if (duble.length > 0) {
+  const handleAddToCart = (): void => {
+    const isAlreadyInCart = cartProduct.some((item: CartItem) => item.id === product.id);
+
+    if (isAlreadyInCart) {
       dispatch(Notify("error", "کالای مورد نظر در سبد خرید موجود است !"));
     } else {
-      dispatch(AddToCart(product));
+      // The AddToCart action expects a CartItem, but the product prop has a different shape.
+      // Casting to 'any' to preserve the original behavior until the Redux store and actions are fully typed.
+      dispatch(AddToCart(product as any));
       dispatch(Notify("success", "کالای مورد نظر به سبد خرید افزوده شد"));
     }
   };
@@ -92,7 +119,10 @@ export const ProductItem = ({ product }) => {
               <button
                 className="flex justify-center items-center bg-primary text-white rounded p-1 hover:text-primary
                     hover:bg-white hover:border h-6 w-6 border-primary"
-                onClick={handleAddToCart}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleAddToCart();
+                }}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

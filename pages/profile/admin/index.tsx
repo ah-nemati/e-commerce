@@ -8,7 +8,7 @@ import { useRouter } from "next/router";
 import axios from "axios";
 
 const Index = () => {
-  const { product } = useSelector((state) => state);
+  const { product } = useSelector((state: any) => state);
   const { push } = useRouter();
   const dispatch = useDispatch();
 
@@ -36,7 +36,7 @@ const Index = () => {
           </svg>
           <span>ایجاد محصول جدید</span>
         </Link>
-        {product?.product?.map((prod, index) => (
+        {product?.product?.map((prod: any, index: number) => (
           <div
             className="flex flex-row border w-full p-2 rounded"
             key={prod.id}

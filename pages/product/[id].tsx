@@ -9,12 +9,16 @@ import PersianNumber from "../../Hooks/PersianNumber";
 import { AddToCart, Notify } from "../../Store/Actions";
 import truck from "./../../images/truck.png";
 
+interface RootState {
+  cart: any[];
+}
+
 const Product = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const [data, setdata] = useState(null);
   const { id } = router.query;
-  const cartProduct = useSelector((state) => state.cart);
+  const cartProduct = useSelector((state: RootState) => state.cart);
 
   useEffect(() => {
     if (id) {
@@ -316,7 +320,7 @@ const Product = () => {
                 <hr />
                 <div className="flex flex-col gap-4">
                   <span className="flex justify-end">
-                    {PersianNumber(data.price)} تومان
+                    {data.price && PersianNumber(data.price)} تومان
                   </span>
                   <span className="text-red-500 text-sm">
                     تنها 1 عدد در انبار فروشگاه مانده

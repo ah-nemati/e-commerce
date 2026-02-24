@@ -18,7 +18,7 @@ export default function Signup() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     if (email !== "" && password !== "") {
       if (password===re_password) {   

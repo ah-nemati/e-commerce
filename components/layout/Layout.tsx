@@ -4,9 +4,16 @@ import { Toast } from "../Tools/Toast";
 import { Footer } from "./Footer";
 import { Navbar } from "./Navbar";
 
-export const Layout = ({ children }) => {
+interface RootState {
+  massege: {
+    massege: string;
+    status: string;
+  }
+}
+
+export const Layout: React.FC = ({ children }) => {
   const [IsShow, setIsShow] = useState(false);
-  const {massege}  = useSelector((state) => state);
+  const {massege}  = useSelector((state: RootState) => state);
 
   const notifyColor = {
     error: { color: "red", bg: "#ffd0d0" },

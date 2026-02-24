@@ -2,26 +2,27 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SetFilter } from "../../Store/Actions";
 import { PriceRange } from "../Tools/PriceRange";
+import { State, Product } from "../../Store/types";
 
-const Filter = () => {
-  const [showBrandBtn, setshowBrandBtn] = useState(true);
-  const [displayBrand, setdisplaybrand] = useState("none");
-  const [showRangeBtn, setshowRangeBtn] = useState(true);
-  const [displayRange, setdisplayRange] = useState("none");
-  const [brand, setBrand] = useState([]);
+const Filter: React.FC = () => {
+  const [showBrandBtn, setshowBrandBtn] = useState<boolean>(true);
+  const [displayBrand, setdisplaybrand] = useState<string>("none");
+  const [showRangeBtn, setshowRangeBtn] = useState<boolean>(true);
+  const [displayRange, setdisplayRange] = useState<string>("none");
+  const [brand, setBrand] = useState<string[]>([]);
 
   const dispatch = useDispatch();
 
-  const {product, theme } = useSelector((state) => state);
+  const { product, theme } = useSelector((state: State) => state);
 
-  const handelShowBrand = () => {
+  const handelShowBrand = (): void => {
     setshowBrandBtn(!showBrandBtn);
   };
 
-  const handelShowRange = () => {
+  const handelShowRange = (): void => {
     setshowRangeBtn(!showRangeBtn);
   };
-  const saveBrandName = (str) => {
+  const saveBrandName = (str: string): void => {
     brand.includes(str)
       ? setBrand(brand.filter((item) => item != str))
       : setBrand([...brand, str]);
@@ -39,19 +40,19 @@ const Filter = () => {
   }, [showRangeBtn]);
 
   useEffect(() => {
-    if (product.product && product.product.length > 0) {
+    if (Array.isArray(product)) {
       dispatch(
         SetFilter(
-          product.product.filter((item) => brand.includes(item.data_layer.brand))
+          product.filter((item: Product) => brand.includes(item.name))
         )
       );
     }
   }, [brand]);
 
-  const [IsMobile, setIsMobile] = useState(false);
-  const [IsLaptop, setIsLaptop] = useState(false);
-  const [IsOther, setIsOther] = useState(false);
-  const [IsAll, setIsAll] = useState(true);
+  const [IsMobile, setIsMobile] = useState<boolean>(false);
+  const [IsLaptop, setIsLaptop] = useState<boolean>(false);
+  const [IsOther, setIsOther] = useState<boolean>(false);
+  const [IsAll, setIsAll] = useState<boolean>(true);
 
   return (
     <div
@@ -71,11 +72,13 @@ const Filter = () => {
           fontWeight: IsAll ? "bold" : "normal",
         }}
         onClick={() => {
-          dispatch(SetFilter(product.product.filter((item) => item)));
-          setIsMobile(false);
-          setIsLaptop(false);
-          setIsOther(false);
-          setIsAll(true);
+          if (Array.isArray(product)) {
+            dispatch(SetFilter(product.filter((item: Product) => item)));
+            setIsMobile(false);
+            setIsLaptop(false);
+            setIsOther(false);
+            setIsAll(true);
+          }
         }}
       >
         <svg
@@ -107,17 +110,19 @@ const Filter = () => {
           fontWeight: IsMobile ? "bold" : "normal",
         }}
         onClick={() => {
-          dispatch(
-            SetFilter(
-              product.product.filter(
-                (item) => item.data_layer.category === "گوشی موبایل"
+          if (Array.isArray(product)) {
+            dispatch(
+              SetFilter(
+                product.filter(
+                  (item: any) => item.data_layer.category === "گوشی موبایل"
+                )
               )
-            )
-          );
-          setIsMobile(true);
-          setIsLaptop(false);
-          setIsOther(false);
-          setIsAll(false);
+            );
+            setIsMobile(true);
+            setIsLaptop(false);
+            setIsOther(false);
+            setIsAll(false);
+          }
         }}
       >
         <svg
@@ -149,17 +154,19 @@ const Filter = () => {
           fontWeight: IsLaptop ? "bold" : "normal",
         }}
         onClick={() => {
-          dispatch(
-            SetFilter(
-              product.product.filter(
-                (item) => item.data_layer.category === "لپ تاپ و الترابوک"
+          if (Array.isArray(product)) {
+            dispatch(
+              SetFilter(
+                product.filter(
+                  (item: any) => item.data_layer.category === "لپ تاپ و الترابوک"
+                )
               )
-            )
-          );
-          setIsMobile(false);
-          setIsLaptop(true);
-          setIsOther(false);
-          setIsAll(false);
+            );
+            setIsMobile(false);
+            setIsLaptop(true);
+            setIsOther(false);
+            setIsAll(false);
+          }
         }}
       >
         <svg
@@ -190,19 +197,21 @@ const Filter = () => {
           fontWeight: IsOther ? "bold" : "normal",
         }}
         onClick={() => {
-          dispatch(
-            SetFilter(
-              product.product.filter(
-                (item) =>
-                  item.data_layer.category !== "لپ تاپ و الترابوک" &&
-                  item.data_layer.category !== "گوشی موبایل"
+          if (Array.isArray(product)) {
+            dispatch(
+              SetFilter(
+                product.filter(
+                  (item: any) =>
+                    item.data_layer.category !== "لپ تاپ و الترابوک" &&
+                    item.data_layer.category !== "گوشی موبایل"
+                )
               )
-            )
-          );
-          setIsMobile(false);
-          setIsLaptop(false);
-          setIsOther(true);
-          setIsAll(false);
+            );
+            setIsMobile(false);
+            setIsLaptop(false);
+            setIsOther(true);
+            setIsAll(false);
+          }
         }}
       >
         <span className="w-5 h-5 z-10">

@@ -11,7 +11,7 @@ const Settings = () => {
       <div className="flex-col rounded dark:text-white text-gray-500 bg-white dark:bg-slate-600 h-80 sm:w-8/12 justify-center items-center gap-8">
         <span>
           نام کاربری :{" "}
-          <span className="dark:text-white text-gray-800">{email.split("@")[0]}</span>
+          <span className="dark:text-white text-gray-800">{email && email.split("@")[0]}</span>
         </span>
         <span>
           ایمیل : <span className="dark:text-white text-gray-800">{email}</span>

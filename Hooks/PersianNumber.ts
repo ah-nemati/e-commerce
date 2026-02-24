@@ -1,7 +1,7 @@
-export default function PersianNumber(num) {
-  const number = num + "";
-  let arr = [];
-  for (let index = 0; index < number.length - 1; index++) {
+export default function PersianNumber(num: number | string): string {
+  const number = String(num);
+  let arr: string[] = [];
+  for (let index = 0; index < number.length; index++) {
     const element = number[index];
     switch (element) {
       case "0":
@@ -33,17 +33,20 @@ export default function PersianNumber(num) {
         break;
       case "9":
         arr[index] = "۹";
+        break;
       default:
-        arr;
+        arr[index] = element;
         break;
     }
   }
-  let count = 0;
-  for (let index = arr.length; index > 0; index--) {
-    count++;
-    if (count % 3 === 0 && count < arr.length - 1) {
-      arr.splice(index - 1, 0, ",");
+
+  let result = "";
+  const len = arr.length;
+  for (let i = 0; i < len; i++) {
+    result += arr[i];
+    if ((len - i - 1) > 0 && (len - i - 1) % 3 === 0) {
+      result += ",";
     }
   }
-  return arr.join("");
+  return result;
 }

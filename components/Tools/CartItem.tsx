@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, FC } from "react";
+import { Dispatch } from "redux";
 import PersianNumber from "../../Hooks/PersianNumber";
 import {
   decreaseNumOfProduct,
@@ -7,11 +8,29 @@ import {
   RemoveCart,
 } from "../../Store/Actions";
 
-export const CartItem = ({ product, cartProduct, dispatch }) => {
-  const [IsDisable, setIsDisable] = useState(false);
+// This interface describes the product object as it is used in this component.
+interface CartProduct {
+  id: string;
+  images: {
+    url: string[];
+  };
+  title_fa: string;
+  price: number;
+  Quanity: number;
+}
+
+interface Props {
+  product: CartProduct;
+  cartProduct: CartProduct[];
+  dispatch: Dispatch<any>;
+}
+
+export const CartItem: FC<Props> = ({ product, cartProduct, dispatch }) => {
+  const [IsDisable, setIsDisable] = useState<boolean>(false);
 
   useEffect(() => {
-    product.Quanity < 2 ? setIsDisable(true) : setIsDisable(false);
+    // The button to decrease the quantity should be disabled if the quantity is 1 or less.
+    setIsDisable(product.Quanity < 2);
   }, [product]);
 
   return (

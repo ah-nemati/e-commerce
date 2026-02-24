@@ -3,8 +3,14 @@ import { useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import ProfileNav from "../../components/Tools/ProfileNav";
 
+interface RootState {
+  user: {
+    email: string;
+  }
+}
+
 const Profile = () => {
-  const { user } = useSelector((state) => state);
+  const { user } = useSelector((state: RootState) => state);
   const { push } = useRouter();
   useEffect(() => {
     if (!user.email) {
