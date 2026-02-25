@@ -1,9 +1,12 @@
+
 import { useDispatch, useSelector } from "react-redux";
 import ProfileNav from "../../components/Tools/ProfileNav";
 import { CartItem } from "../../components/Tools/CartItem";
+import React from "react";
+import { State, ProductType } from "../../types";
 
-const Orders = () => {
-  const { cart } = useSelector((state) => state);
+const Orders: React.FC = () => {
+  const { cart } = useSelector((state: State) => state);
   const dispatch = useDispatch();
 
   return (
@@ -11,7 +14,7 @@ const Orders = () => {
       <ProfileNav />
       <div className="flex-col text-gray-600 dark:text-white rounded bg-white dark:bg-slate-600 min-h-[40vh] sm:w-8/12 justify-center items-center gap-1">
         {cart.length > 0 ? (
-          cart.map((item) => (
+          cart.map((item: ProductType) => (
             <CartItem
               cartProduct={cart}
               key={item.id}

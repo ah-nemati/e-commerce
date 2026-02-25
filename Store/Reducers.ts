@@ -1,12 +1,12 @@
-import { State, Action } from "./types";
+import { Action, State } from "@/types";
 
 const initialState: State = {
-  user: {},
-  massege: { status: "", massege: "" },
-  product: {},
+  user: null,
+  message: { status: "", message: "" },
+  products: [],
   cart: [],
   theme: "light",
-  filter: [],
+  filteredProducts: [],
 };
 
 export default (state: State = initialState, action: Action): State => {
@@ -16,13 +16,13 @@ export default (state: State = initialState, action: Action): State => {
     case "NOTIFY":
       return {
         ...state,
-        massege: {
+        message: {
           status: action.payload.status,
-          massege: action.payload.massege,
+          message: action.payload.message,
         },
       };
     case "PRODUCT":
-      return { ...state, product: action.payload };
+      return { ...state, products: action.payload };
     case "ADD_TO_CART":
       return { ...state, cart: [...state.cart, action.payload] };
     case "REMOVE_CART":
@@ -35,8 +35,8 @@ export default (state: State = initialState, action: Action): State => {
         ...state,
         cart: action.payload.product.map((item) =>
           item.id === action.payload.id
-            ? { ...item, Quanity: item.Quanity + 1 }
-            : { ...item, Quanity: item.Quanity }
+            ? { ...item, Quantity: item.Quantity + 1 }
+            : { ...item, Quantity: item.Quantity }
         ),
       };
     case "DECREASE_NUMBER_OF_PRODUCT":
@@ -44,18 +44,18 @@ export default (state: State = initialState, action: Action): State => {
         ...state,
         cart: action.payload.product.map((item) =>
           item.id === action.payload.id
-            ? { ...item, Quanity: item.Quanity - 1 }
-            : { ...item, Quanity: item.Quanity }
+            ? { ...item, Quantity: item.Quantity - 1 }
+            : { ...item, Quantity: item.Quantity }
         ),
       };
     case "SET_THEME":
       return { ...state, theme: action.payload };
     case "SET_FILTER":
-      return { ...state, filter: action.payload };
+      return { ...state, filteredProducts: action.payload };
     case "LOG_OUT":
-      return { ...state, user: {} };
+      return { ...state, user: null };
     case "CLEAR_SEARCH": {
-      return { ...state, filter: [] };
+      return { ...state, filteredProducts: [] };
     }
     default:
       return state;

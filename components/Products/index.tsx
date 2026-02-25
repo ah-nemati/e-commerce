@@ -3,10 +3,10 @@ import { ProductItem } from "./ProductItem";
 import Filter from "./Filter";
 import { ProductLoad } from "./ProductLoad";
 import { useSelector } from "react-redux";
-import { State, Product } from "../../Store/types";
+import { ProductType, State } from "../../types/index";
 
 interface Props {
-  product: Product[];
+  product: ProductType[];
 }
 
 export const Products: React.FC<Props> = ({ product }) => {
@@ -14,7 +14,7 @@ export const Products: React.FC<Props> = ({ product }) => {
   const [cheapest, setcheapest] = useState<boolean>(false);
   const [mostexpensive, setmostexpensive] = useState<boolean>(false);
   const [mostpopular, setmostpopular] = useState<boolean>(false);
-  const [productItem, setproductItem] = useState<Product[]>([]);
+  const [productItem, setproductItem] = useState<ProductType[]>([]);
   const { theme } = useSelector((state: State) => state);
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export const Products: React.FC<Props> = ({ product }) => {
     if (mostvisited) {
       return setproductItem(
         product
-          ? [...product].sort((a: any, b: any) => b.rating.count - a.rating.count)
+          ? [...product].sort((a: ProductType, b: ProductType) => b.rating.count - a.rating.count)
           : []
       );
     }
@@ -41,7 +41,7 @@ export const Products: React.FC<Props> = ({ product }) => {
     if (mostpopular) {
       return setproductItem(
         product
-          ? [...product].sort((a: any, b: any) => b.rating.rate - a.rating.rate)
+          ? [...product].sort((a: ProductType, b: ProductType) => b.rating.rate - a.rating.rate)
           : []
       );
     }
@@ -76,7 +76,7 @@ export const Products: React.FC<Props> = ({ product }) => {
               className="relative"
               style={{
                 color: mostvisited
-                  ? theme == "dark"
+                  ? theme === "dark"
                     ? "white"
                     : "#374151"
                   : "rgb(107,114,128)",
@@ -100,7 +100,7 @@ export const Products: React.FC<Props> = ({ product }) => {
               className="relative "
               style={{
                 color: cheapest
-                  ? theme == "dark"
+                  ? theme === "dark"
                     ? "white"
                     : "#374151"
                   : "rgb(107,114,128)",
@@ -124,7 +124,7 @@ export const Products: React.FC<Props> = ({ product }) => {
               className="relative "
               style={{
                 color: mostexpensive
-                  ? theme == "dark"
+                  ? theme === "dark"
                     ? "white"
                     : "#374151"
                   : "rgb(107,114,128)",
@@ -148,7 +148,7 @@ export const Products: React.FC<Props> = ({ product }) => {
               className="relative "
               style={{
                 color: mostpopular
-                  ? theme == "dark"
+                  ? theme === "dark"
                     ? "white"
                     : "#374151"
                   : "rgb(107,114,128)",
@@ -172,8 +172,8 @@ export const Products: React.FC<Props> = ({ product }) => {
         </div>
         <div className="flex flex-row custom:flex-col sm:flex-wrap">
           {productItem.length > 0 ? (
-            productItem.map((item: any) => (
-              <ProductItem product={item} key={item.id} />
+            productItem.map((item: ProductType) => (
+              <ProductItem product={item} key={item._id} />
             ))
           ) : (
             <ProductLoad />

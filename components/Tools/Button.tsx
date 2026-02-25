@@ -1,7 +1,8 @@
-import React, { FC, ButtonHTMLAttributes } from "react";
+import React, { FC, ButtonHTMLAttributes, MouseEventHandler } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   value: string;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
 }
 
 export const Button: FC<ButtonProps> = ({ value, ...rest }) => {

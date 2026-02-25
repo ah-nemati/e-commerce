@@ -8,17 +8,15 @@ import { ColorProducts } from "../../components/Tools/ColorProducts";
 import PersianNumber from "../../Hooks/PersianNumber";
 import { AddToCart, Notify } from "../../Store/Actions";
 import truck from "./../../images/truck.png";
+import { State, ProductType } from "../../types";
+import { NextPage } from "next";
 
-interface RootState {
-  cart: any[];
-}
-
-const Product = () => {
+const ProductDetail: NextPage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
-  const [data, setdata] = useState(null);
+  const [data, setdata] = useState<ProductType | null>(null);
   const { id } = router.query;
-  const cartProduct = useSelector((state: RootState) => state.cart);
+  const cartProduct = useSelector((state: State) => state.cart);
 
   useEffect(() => {
     if (id) {
@@ -29,12 +27,21 @@ const Product = () => {
   }, [id]);
 
   const handleAddToCart = () => {
-    const duble = cartProduct.filter((item) => item.id === data.id);
-    if (duble.length > 0) {
-      dispatch(Notify("error", "کالای مورد نظر در سبد خرید موجود است !"));
-    } else {
-      dispatch(AddToCart(data));
-      dispatch(Notify("success", "کالای مورد نظر به سبد خرید افزوده شد"));
+    if (data) {
+      const duble = cartProduct.filter((item) => item.id === data.id);
+      if (duble.length > 0) {
+        dispatch(Notify("error", "کالای مورد نظر در سبد خرید موجود است !"));
+      } else {
+        const productForCart: ProductType = {
+          ...data,
+          _id: data._id,
+          id: data.id.toString(),
+          Quantity: 1,
+          image: data.image,
+        };
+        dispatch(AddToCart(productForCart));
+        dispatch(Notify("success", "کالای مورد نظر به سبد خرید افزوده شد"));
+      }
     }
   };
 
@@ -73,7 +80,7 @@ const Product = () => {
                   <span className="md:max-w-[24vw]">
                     <Image
                       priority
-                      src={data.images.url[0]}
+                      src={data.image.url[0]}
                       width="300"
                       height="300"
                       alt="product"
@@ -309,7 +316,7 @@ const Product = () => {
                   <span className="w-2 h-2 bg-blue-500 rounded-md"></span>
                   <span className="w-5 h-5 mr-6">
                     <Image
-                      src={truck}
+                      src={truck.src}
                       width="300"
                       height="300"
                       alt="truck"
@@ -343,4 +350,4 @@ const Product = () => {
   );
 };
 
-export default Product;
+export default ProductDetail;

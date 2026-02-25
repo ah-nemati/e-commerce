@@ -7,21 +7,11 @@ import {
   increaseNumOfProduct,
   RemoveCart,
 } from "../../Store/Actions";
-
-// This interface describes the product object as it is used in this component.
-interface CartProduct {
-  id: string;
-  images: {
-    url: string[];
-  };
-  title_fa: string;
-  price: number;
-  Quanity: number;
-}
+import { ProductType as CartItemType } from "../../types/index";
 
 interface Props {
-  product: CartProduct;
-  cartProduct: CartProduct[];
+  product: CartItemType;
+  cartProduct: CartItemType[];
   dispatch: Dispatch<any>;
 }
 
@@ -30,7 +20,7 @@ export const CartItem: FC<Props> = ({ product, cartProduct, dispatch }) => {
 
   useEffect(() => {
     // The button to decrease the quantity should be disabled if the quantity is 1 or less.
-    setIsDisable(product.Quanity < 2);
+    setIsDisable(product.Quantity < 2);
   }, [product]);
 
   return (
@@ -42,7 +32,7 @@ export const CartItem: FC<Props> = ({ product, cartProduct, dispatch }) => {
         <div className="flex flex-col">
           <span className="w-[15vw]">
             <Image
-              src={product.images.url[0]}
+              src={product.image.url[0]}
               width="300"
               height="300"
               alt="product"
@@ -101,7 +91,7 @@ export const CartItem: FC<Props> = ({ product, cartProduct, dispatch }) => {
             </svg>
           </button>
           <span className="border border-orange-500 rounded p-1 outline-none">
-            {product.Quanity}
+            {product.Quantity}
           </span>
           <button
             onClick={() => {

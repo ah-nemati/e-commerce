@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SetFilter } from "../../Store/Actions";
 import { PriceRange } from "../Tools/PriceRange";
-import { State, Product } from "../../Store/types";
+import {  ProductType, State } from "../../types/index";
 
 const Filter: React.FC = () => {
   const [showBrandBtn, setshowBrandBtn] = useState<boolean>(true);
@@ -13,7 +13,7 @@ const Filter: React.FC = () => {
 
   const dispatch = useDispatch();
 
-  const { product, theme } = useSelector((state: State) => state);
+  const { products, theme } = useSelector((state: State) => state);
 
   const handelShowBrand = (): void => {
     setshowBrandBtn(!showBrandBtn);
@@ -40,14 +40,18 @@ const Filter: React.FC = () => {
   }, [showRangeBtn]);
 
   useEffect(() => {
-    if (Array.isArray(product)) {
-      dispatch(
-        SetFilter(
-          product.filter((item: Product) => brand.includes(item.name))
-        )
-      );
+    if (Array.isArray(products)) {
+      if (brand.length > 0) {
+        dispatch(
+          SetFilter(
+            products.filter((item: ProductType) => brand.includes(item.data_layer.brand))
+          )
+        );
+      } else {
+        dispatch(SetFilter([]))
+      }
     }
-  }, [brand]);
+  }, [brand, products, dispatch]);
 
   const [IsMobile, setIsMobile] = useState<boolean>(false);
   const [IsLaptop, setIsLaptop] = useState<boolean>(false);
@@ -65,15 +69,15 @@ const Filter: React.FC = () => {
         text-base"
         style={{
           color: IsAll
-            ? theme == "dark"
+            ? theme === "dark"
               ? "white"
               : "#374151"
             : "rgb(107,114,128)",
           fontWeight: IsAll ? "bold" : "normal",
         }}
         onClick={() => {
-          if (Array.isArray(product)) {
-            dispatch(SetFilter(product.filter((item: Product) => item)));
+          if (Array.isArray(products)) {
+            dispatch(SetFilter(products.filter((item: ProductType) => item)));
             setIsMobile(false);
             setIsLaptop(false);
             setIsOther(false);
@@ -103,18 +107,18 @@ const Filter: React.FC = () => {
         text-base"
         style={{
           color: IsMobile
-            ? theme == "dark"
+            ? theme === "dark"
               ? "white"
               : "#374151"
             : "rgb(107,114,128)",
           fontWeight: IsMobile ? "bold" : "normal",
         }}
         onClick={() => {
-          if (Array.isArray(product)) {
+          if (Array.isArray(products)) {
             dispatch(
               SetFilter(
-                product.filter(
-                  (item: any) => item.data_layer.category === "گوشی موبایل"
+                products.filter(
+                  (item: ProductType) => item.data_layer.category === "گوشی موبایل"
                 )
               )
             );
@@ -147,18 +151,18 @@ const Filter: React.FC = () => {
     text-base"
         style={{
           color: IsLaptop
-            ? theme == "dark"
+            ? theme === "dark"
               ? "white"
               : "#374151"
             : "rgb(107,114,128)",
           fontWeight: IsLaptop ? "bold" : "normal",
         }}
         onClick={() => {
-          if (Array.isArray(product)) {
+          if (Array.isArray(products)) {
             dispatch(
               SetFilter(
-                product.filter(
-                  (item: any) => item.data_layer.category === "لپ تاپ و الترابوک"
+                products.filter(
+                  (item: ProductType) => item.data_layer.category === "لپ تاپ و الترابوک"
                 )
               )
             );
@@ -190,18 +194,18 @@ const Filter: React.FC = () => {
         className="flex gap-2 relative text-gray-400 hover:bg-gray-50 rounded-sm dark:hover:bg-slate-600 p-1 text-base"
         style={{
           color: IsOther
-            ? theme == "dark"
+            ? theme === "dark"
               ? "white"
               : "#374151"
             : "rgb(107,114,128)",
           fontWeight: IsOther ? "bold" : "normal",
         }}
         onClick={() => {
-          if (Array.isArray(product)) {
+          if (Array.isArray(products)) {
             dispatch(
               SetFilter(
-                product.filter(
-                  (item: any) =>
+                products.filter(
+                  (item: ProductType) =>
                     item.data_layer.category !== "لپ تاپ و الترابوک" &&
                     item.data_layer.category !== "گوشی موبایل"
                 )

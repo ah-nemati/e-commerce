@@ -4,6 +4,7 @@ import { Logout } from "../../Store/Actions";
 import { useDispatch, useSelector } from "react-redux";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { State, User } from "../../types";
 
 const ProfileNav = () => {
   const dispatch = useDispatch();
@@ -12,15 +13,14 @@ const ProfileNav = () => {
   const [isNotifications, setIsNotifications] = useState(false);
   const [isSettings, setIsSettings] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const { theme, user } = useSelector((state) => state);
-  const { email, role } = user;
+  const { theme, user } = useSelector((state: State) => state);
 
   const router = useRouter();
   useEffect(() => {
-    if (Object.keys(user).length == 0) {
+    if (!user) {
       router.push("/");
     }
-  }, [user]);
+  }, [user, router]);
   useEffect(() => {
     switch (router.pathname) {
       case "/profile/settings":
@@ -91,7 +91,7 @@ const ProfileNav = () => {
             d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"
           />
         </svg>
-        <span>{email && email.split("@")[0]}</span>
+        <span>{user && user.email && user.email.split("@")[0]}</span>
       </div>
       <hr className="pb-2" />
       {/* index */}
@@ -121,7 +121,7 @@ const ProfileNav = () => {
         />
       </Link>
       {/* orders */}
-      {!role ? (
+      {user && !user.role ? (
         <Link
           href={"/profile/orders"}
           style={{
@@ -150,7 +150,7 @@ const ProfileNav = () => {
         ""
       )}
       {/* admin options */}
-      {role ? (
+      {user && user.role ? (
         <Link
           href={"/profile/admin"}
           style={{
@@ -194,7 +194,7 @@ const ProfileNav = () => {
               ? isNotifications
                 ? "rgb(249 115 22)"
                 : "rgb(75 85 99)"
-              : "white",
+                : "white",
         }}
       >
         <NavItem
@@ -219,7 +219,7 @@ const ProfileNav = () => {
               ? isSettings
                 ? "rgb(249 115 22)"
                 : "rgb(75 85 99)"
-              : "white",
+                : "white",
         }}
       >
         <NavItem

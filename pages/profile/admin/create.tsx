@@ -1,24 +1,27 @@
+
 import axios from "axios";
 import ProfileNav from "../../../components/Tools/ProfileNav";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Notify } from "../../../Store/Actions";
 import { useRouter } from "next/router";
+import React from "react";
+import { Color } from "@/types";
 
-const Create = () => {
+const Create: React.FC = () => {
   const dispatch = useDispatch();
   const { push } = useRouter();
 
-  const colorhxcodeRef = useRef();
-  const colortitleRef = useRef();
-  const titleRef = useRef();
-  const brandRef = useRef();
-  const categoryRef = useRef();
+  const colorhxcodeRef = useRef<HTMLInputElement>(null);
+  const colortitleRef = useRef<HTMLInputElement>(null);
+  const titleRef = useRef<HTMLInputElement>(null);
+  const brandRef = useRef<HTMLSelectElement>(null);
+  const categoryRef = useRef<HTMLSelectElement>(null);
 
-  const [color, setColor] = useState([]);
+  const [color, setColor] = useState<Color[]>([]);
   const [link, setLink] = useState("");
   const [title, setTitle] = useState("");
-  const [price, setPrice] = useState();
+  const [price, setPrice] = useState<number | "">("");
 
   const [isColor, setIsColor] = useState(false);
   const [isLink, setIsLink] = useState(false);
@@ -35,7 +38,6 @@ const Create = () => {
   const [errorTitle, seterrorTitle] = useState("");
   const [focusTitle, setFocusTitle] = useState(false);
 
-  
   useEffect(() => {
     titleRef?.current?.focus();
   }, []);
@@ -55,7 +57,7 @@ const Create = () => {
             .get(link)
             .then(() => {
               setIsLink(true);
-              setErrorLinkImage();
+              setErrorLinkImage("");
             })
             .catch(() => setErrorLinkImage("لینک عکس اشتباه است"));
         }
@@ -67,19 +69,19 @@ const Create = () => {
   }, [link]);
 
   useEffect(() => {
-    const priceRegx = new RegExp("^[0-9]");
-    if (!priceRegx.test(price) && price > 0) {
+    const priceRegx = new RegExp("^[0-9]$");
+    if (price && !priceRegx.test(price.toString()) && price > 0) {
       setErrorPriceInput("از فرمت عددی استفاده کنید");
     } else {
-      setErrorPriceInput();
-      setIsPrice(price > 0 ? true : false);
+      setErrorPriceInput("");
+      setIsPrice((+price) > 0 ? true : false);
     }
   }, [price]);
 
   useEffect(() => {
     if (title.length >= 10) {
       setIsTitle(true);
-      seterrorTitle();
+      seterrorTitle("");
     } else {
       seterrorTitle("نام محصول باید حداقل 10 کاراکتر باشد");
       setIsTitle(false);
@@ -94,9 +96,9 @@ const Create = () => {
     const brand = brandRef?.current?.value;
     const category = categoryRef?.current?.value;
     if (brand && category && isColor && isPrice && isTitle && isLink) {
-      setColorMessage();
-      setErrorPriceInput();
-      setErrorLinkImage();
+      setColorMessage("");
+      setErrorPriceInput("");
+      setErrorLinkImage("");
       axios
         .post("/api/createProduct", {
           color,
@@ -119,7 +121,7 @@ const Create = () => {
     }
   };
 
-  const saveColor = (e) => {
+  const saveColor = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const hex_code = colorhxcodeRef.current?.value;
     const title = colortitleRef.current?.value;
@@ -129,7 +131,7 @@ const Create = () => {
         for (let index = 0; index < color.length; index++) {
           if (
             color[index].hex_code == hex_code ||
-            color[index].title == title
+            color[index]?.title == title
           ) {
             found = true;
           }
@@ -138,12 +140,12 @@ const Create = () => {
           setColor([
             ...color,
             {
-              id: !color.length ? 1 : color.length + 1,
+              id: color.length ? color.length + '1' : '1',
               hex_code,
               title,
             },
           ]);
-          setColorMessage();
+          setColorMessage("");
         } else {
           setColorMessage("رنگ قبلا اضافه شده است");
         }
@@ -151,12 +153,12 @@ const Create = () => {
         setColor([
           ...color,
           {
-            id: !color.length ? 1 : color.length + 1,
+            id: color.length ? color.length + '1' : '1',
             hex_code,
             title,
           },
         ]);
-        setColorMessage();
+        setColorMessage("");
       }
     } else {
       setColorMessage("فیلد ها را کامل کنید");
@@ -258,7 +260,9 @@ const Create = () => {
               value={price}
               onFocus={() => setFocusPrice(true)}
               onBlur={() => setFocusPrice(false)}
-              onChange={(e) => setPrice(e.target.value)}
+              onChange={(e) =>
+                setPrice(e.target.value ? parseInt(e.target.value) : "")
+              }
             />
             <span
               className={`${
@@ -312,7 +316,7 @@ const Create = () => {
           <label htmlFor="colors">رنگ های موجود : </label>
           <div id="colors" className="flex flex-row gap-2 text-gray-400">
             {color.length > 0
-              ? color.map((el) => (
+              ? color.map((el: Color) => (
                   <div
                     className="flex flex-col border p-1 rounded min-w-[100px] gap-2"
                     key={el.id}

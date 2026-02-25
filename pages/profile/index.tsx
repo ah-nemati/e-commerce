@@ -2,28 +2,24 @@ import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import ProfileNav from "../../components/Tools/ProfileNav";
+import { NextPage } from "next";
+import { State } from "@/types";
 
-interface RootState {
-  user: {
-    email: string;
-  }
-}
-
-const Profile = () => {
-  const { user } = useSelector((state: RootState) => state);
+const Profile: NextPage = () => {
+  const { user } = useSelector((state: State) => state);
   const { push } = useRouter();
   useEffect(() => {
-    if (!user.email) {
+    if (!user?.email) {
       push("/");
     }
-  }, [user]);
+  }, [user, push]);
 
   return (
-    <div className="sm:flex-row flex-col md:mx-52 m-0 my-10 sm:justify-around sm:p-0 p-3 sm:gap-0 gap-2">
+    <div className="flex sm:flex-row flex-col md:mx-52 m-0 my-10 sm:justify-around sm:p-0 p-3 sm:gap-0 gap-2">
       <ProfileNav />
-      <div className="flex-col rounded bg-white dark:bg-slate-600 h-80 sm:w-8/12 justify-center items-center gap-8">
-        <div className="flex-col dark:text-white text-gray-600 gap-2">
-          <span className="flex-row self-center">
+      <div className="flex flex-col rounded bg-white dark:bg-slate-600 h-80 sm:w-8/12 justify-center items-center gap-8">
+        <div className="flex flex-col dark:text-white text-gray-600 gap-2 items-center">
+          <span className="flex flex-row self-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -42,7 +38,7 @@ const Profile = () => {
           <span className="text-xl">اعتبار فعلی شما : </span>
           <span className="text-center">۰ تومان</span>
         </div>
-        <div className="flex-row justify-center gap-4">
+        <div className="flex flex-row justify-center gap-4">
           <button className="bg-orange-600 text-white py-2 px-6 rounded">
             افزایش اعتبار
           </button>

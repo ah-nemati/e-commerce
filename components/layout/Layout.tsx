@@ -1,19 +1,13 @@
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Toast } from "../Tools/Toast";
 import { Footer } from "./Footer";
 import { Navbar } from "./Navbar";
+import { State } from "../../types";
 
-interface RootState {
-  massege: {
-    massege: string;
-    status: string;
-  }
-}
-
-export const Layout: React.FC = ({ children }) => {
+export const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [IsShow, setIsShow] = useState(false);
-  const {massege}  = useSelector((state: RootState) => state);
+  const { message,status } = useSelector((state: State) => state.message);
 
   const notifyColor = {
     error: { color: "red", bg: "#ffd0d0" },
@@ -52,10 +46,10 @@ export const Layout: React.FC = ({ children }) => {
   };
 
   useEffect(() => {
-    if (massege.massege !== "") {
+    if (message !== "") {
       setIsShow(true);
     }
-  }, [massege]);
+  }, [message]);
 
   useEffect(() => {
     if (IsShow) {
@@ -74,19 +68,19 @@ export const Layout: React.FC = ({ children }) => {
   return (
     <div dir="rtl" className="bg-gray-100 dark:bg-slate-900">
       <Navbar />
-      {massege.status === "error" && IsShow && (
+      {status === "error" && IsShow && (
         <Toast
-          msg={massege.massege}
+          msg={message}
           color={notifyColor.error.color}
           bg={notifyColor.error.bg}
           handelShow={handelShow}
           IsShow={IsShow}
-          svg={svg.success}
+          svg={svg.error}
         />
-      )}{" "}
-      {massege.status === "success" && IsShow && (
+      )}
+      {status === "success" && IsShow && (
         <Toast
-          msg={massege.massege}
+          msg={message}
           color={notifyColor.success.color}
           bg={notifyColor.success.bg}
           handelShow={handelShow}

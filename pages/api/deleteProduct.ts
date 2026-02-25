@@ -1,8 +1,28 @@
+import { NextApiRequest, NextApiResponse } from "next";
 import products from "../../utils/models/products";
 import ConnectDB from "../../utils/mongodb";
-ConnectDB();
-export default async function Delete(req, res) {
-  const { id } = await req?.body;
-  await products.deleteOne({ id });
-  return res.json({ success: "updated !" });
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== "DELETE" && req.method !== "POST") {
+    return res.status(405).json({ success: false, message: "Method not allowed" });
+  }
+
+  try {
+    await ConnectDB();
+    const { id } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ success: false, message: "ID is required" });
+    }
+
+    const result = await products.deleteOne({ id });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    return res.status(200).json({ success: true, message: "deleted !" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
 }

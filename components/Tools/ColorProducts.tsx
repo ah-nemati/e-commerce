@@ -1,22 +1,13 @@
+import { Color } from "@/types";
 import { useState, FC } from "react";
 
-// Define an interface for a single color object to ensure type safety.
-interface Color {
-  id: string | number;
-  title: string;
-  hex_code: string;
-}
-
-// Define the props interface for the component.
 interface Props {
   colors: Color[];
 }
 
 export const ColorProducts: FC<Props> = ({ colors }) => {
-  // The active state holds the ID of the selected color.
   const [active, setactive] = useState<string | number>(colors[0].id);
 
-  // Use find() for better performance as it stops searching once a match is found.
   const activeColor = colors.find((color) => color.id === active);
 
   return (
@@ -38,8 +29,6 @@ export const ColorProducts: FC<Props> = ({ colors }) => {
             <span
               style={{
                 backgroundColor: color.hex_code,
-                // The checkmark color should contrast with its background.
-                // It defaults to white, but if the background is also white, it becomes black.
                 color:
                   active === color.id
                     ? color.hex_code === "#FFFFFF"

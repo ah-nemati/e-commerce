@@ -1,6 +1,18 @@
 import { useEffect, useState } from "react";
+import React from "react";
 
-export const Toast = ({ msg, bg, color, handelShow, svg }) => {
+interface ToastProps {
+  msg: string;
+  bg: string;
+  color: string;
+  handelShow: () => void;
+  svg: React.ReactNode;
+  IsShow: boolean;
+}
+
+export const Toast: React.FC<ToastProps> = ({ msg, bg, color, handelShow, svg, IsShow }) => {
+  if (!IsShow) return null;
+
   return (
     <div
       className="flex justify-between fixed z-10

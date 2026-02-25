@@ -2,14 +2,15 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ClearSearch, SetFilter, SetTheme } from "../../Store/Actions";
+import { State } from "../../types";
 
 export const Navbar = () => {
-  const { cart, theme, user, product } = useSelector((state) => state);
+  const { cart, theme, user, products } = useSelector((state: State) => state);
   const dispatch = useDispatch();
 
   const [themepage, setthemepage] = useState(theme);
   const [themeListShow, setthemeListShow] = useState(false);
-  const [userName, setuserName] = useState();
+  const [userName, setuserName] = useState<string>("");
   const [searchValue, setsearchValue] = useState("");
 
   const themeLight = (
@@ -81,25 +82,25 @@ export const Navbar = () => {
         .querySelectorAll(".option")
         .forEach((element) =>
           element.addEventListener("click", () =>
-            element.getAttribute("value") == "system"
+            element.getAttribute("value") === "system"
               ? window.matchMedia("(prefers-color-scheme: dark)").matches
                 ? setthemepage("dark")
                 : setthemepage("light")
-              : setthemepage(element.getAttribute("value"))
+              : setthemepage((element.getAttribute("value") as "light" | "dark" | "system") ?? "system")
           )
         );
       dispatch(SetTheme(themepage));
     }
-  }, [themeListShow, themepage]);
+  }, [themeListShow, themepage, dispatch]);
 
   useEffect(() => {
-    setuserName(user.email ? user.email.split("@")[0] : "");
+    setuserName(user && user.email ? user.email.split("@")[0] : "");
   }, [user]);
 
   const handleSearch = () => {
     dispatch(
       SetFilter(
-        product.product.filter((item) => item.title_fa.includes(searchValue))
+        products.filter((item) => item.title_fa.includes(searchValue))
       )
     );
   };
@@ -108,12 +109,12 @@ export const Navbar = () => {
     if (searchValue === "") {
       dispatch(ClearSearch());
     } else {
-      const filtered = product.product.filter((item) =>
+      const filtered = products.filter((item) =>
         item.title_fa.includes(searchValue)
       );
       dispatch(SetFilter(filtered));
     }
-  }, [searchValue]);
+  }, [searchValue, dispatch, products]);
 
   useEffect(() => {
     if (!localStorage.getItem("theme")) {
@@ -127,32 +128,32 @@ export const Navbar = () => {
         document
           .getElementsByTagName("html")
           .item(0)
-          .setAttribute("class", "dark");
+          ?.setAttribute("class", "dark");
         break;
       case "system":
         if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
           document
             .getElementsByTagName("html")
             .item(0)
-            .setAttribute("class", "dark");
+            ?.setAttribute("class", "dark");
         } else {
           document
             .getElementsByTagName("html")
             .item(0)
-            .removeAttribute("class");
+            ?.removeAttribute("class");
         }
         break;
       default:
-        document.getElementsByTagName("html").item(0).removeAttribute("class");
+        document.getElementsByTagName("html").item(0)?.removeAttribute("class");
         break;
     }
-  }, [theme]);
+  }, [theme, themepage]);
   return (
     <>
       <div className="flex flex-col shadow-md border-b sticky dark:border-slate-700 dark:bg-slate-900 dark:text-white bg-white top-0 z-20">
         <div className="flex items-center dark:bg-slate-900 dark:text-white bg-white h-20 w-full px-8">
           {/*  logo  */}
-          <Link href={"/"} passHref>
+          <Link href={"/"} passHref legacyBehavior>
             <div className="flex items-center gap-2 md:ml-10 cursor-pointer">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -203,7 +204,7 @@ export const Navbar = () => {
           <div className="md:w-5/12 w-2/3 flex gap-6 justify-end items-center absolute left-8">
             {/* login icon */}
             {userName !== "" ? (
-              <Link href={"/profile"} passHref>
+              <Link href={"/profile"} passHref legacyBehavior>
                 <button className="md:flex hidden flex-col items-center text-xs gap-1">
                   {" "}
                   <svg
@@ -224,7 +225,7 @@ export const Navbar = () => {
                 </button>
               </Link>
             ) : (
-              <Link href={"/Auth/Signin"} passHref>
+              <Link href={"/Auth/Signin"} passHref legacyBehavior>
                 <button className="md:flex hidden items-center gap-3 text-xs border p-2 rounded-md">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -245,7 +246,7 @@ export const Navbar = () => {
               </Link>
             )}
             {userName !== "" ? (
-              <Link href={"/profile"} passHref>
+              <Link href={"/profile"} passHref legacyBehavior>
                 <button className="md:hidden flex items-center gap-3 text-xs rounded-md">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -264,7 +265,7 @@ export const Navbar = () => {
                 </button>
               </Link>
             ) : (
-              <Link href={"/Auth/Signin"} passHref>
+              <Link href={"/Auth/Signin"} passHref legacyBehavior>
                 <button className="md:hidden flex items-center gap-3 text-xs rounded-md">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -285,7 +286,7 @@ export const Navbar = () => {
             )}
             <div className="w-[1.5px] h-5 bg-gray-400"></div>
             {/* cart icon */}
-            <Link href={"/cart"} passHref>
+            <Link href={"/cart"} passHref legacyBehavior>
               <button className="flex flex-col items-center dark:text-white text-gray-600 gap-1 text-base">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -304,12 +305,12 @@ export const Navbar = () => {
               </button>
             </Link>
             <span className="absolute text-xs flex justify-center items-center dark:border-none text-white bg-orange-500 w-7 h-7 left-[63px] md:-top-[3px] -top-[10px] border-white border-4 rounded-full">
-              {cart ? cart.length : 0}
+              {Array.isArray(cart) ? cart.length : 0}
             </span>
             {/* favorite icon */}
             <button
               className="flex flex-col items-center dark:text-white text-gray-600 gap-1 text-base"
-              onClick={(e) => setthemeListShow(!themeListShow)}
+              onClick={() => setthemeListShow(!themeListShow)}
             >
               {themepage === "light"
                 ? themeLight

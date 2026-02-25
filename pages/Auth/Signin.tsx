@@ -9,15 +9,16 @@ import google from "../../images/google.png";
 import { Auth, Notify } from "../../Store/Actions";
 import { validate } from "../../utils/validate";
 import Input from "../../components/Tools/Input";
-import { useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
+import { NextPage } from "next";
 
-export default function Signin() {
-  const [email, setemail] = useState("");
-  const [password, setpassword] = useState("");
+const Signin: NextPage = () => {
+  const [email, setemail] = useState<string>("");
+  const [password, setpassword] = useState<string>("");
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     axios.post("/api/signin", { email, password }).then((res) => {
       if (res.data.status === "error") {
@@ -50,14 +51,14 @@ export default function Signin() {
           <h1 className="md:text-2xl text-lg text-center text-gray-500 dark:text-white">
             ورود
           </h1>
-          <ImageButton src={google} value="ورود با گوگل" />
+          <ImageButton src={google.src} value="ورود با گوگل" />
           <div className="relative flex justify-center">
             <h3 className="text-xs text-gray-400 z-10 relative dark:bg-slate-900  bg-white px-3">
               یا ورود به حساب با
             </h3>
             <i className="absolute top-1/2 transform -translate-y-1/2 z-0 right-0 w-full flex border-t border-gray-500 border-opacity-30"></i>
           </div>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-6" autoComplete="true">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
             <label
               htmlFor={"email"}
               className="flex flex-col text-gray-600 dark:text-white text-sm gap-2"
@@ -72,7 +73,9 @@ export default function Signin() {
                   type="email"
                   id="email"
                   value={email}
-                  onChange={(e) => setemail(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setemail(e.target.value)
+                  }
                   required
                 />
               </div>
@@ -120,4 +123,6 @@ export default function Signin() {
       </main>
     </>
   );
-}
+};
+
+export default Signin;

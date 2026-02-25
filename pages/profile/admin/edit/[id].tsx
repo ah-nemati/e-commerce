@@ -4,21 +4,23 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { Notify } from "../../../../Store/Actions";
+import React from "react";
+import { Color, ProductType } from "@/types";
 
-const Edit = () => {
+const Edit: React.FC = () => {
   const dispatch = useDispatch();
   const { push } = useRouter();
-  const [product, setProduct] = useState<any>({});
+  const [product, setProduct] = useState<Partial<ProductType>>({});
 
-  const colorhxcodeRef = useRef<any>();
-  const colortitleRef = useRef<any>();
-  const titleRef = useRef<any>();
-  const brandRef = useRef<any>();
-  const categoryRef = useRef<any>();
-  const priceRef = useRef<any>();
-  const linkImageREf = useRef<any>();
+  const colorhxcodeRef = useRef<HTMLInputElement>(null);
+  const colortitleRef = useRef<HTMLInputElement>(null);
+  const titleRef = useRef<HTMLInputElement>(null);
+  const brandRef = useRef<HTMLSelectElement>(null);
+  const categoryRef = useRef<HTMLSelectElement>(null);
+  const priceRef = useRef<HTMLInputElement>(null);
+  const linkImageREf = useRef<HTMLInputElement>(null);
 
-  const [color, setColor] = useState({});
+  const [color, setColor] = useState<Partial<Color>>({});
 
   const [focusColorCode, setFocusColorCode] = useState(false);
   const [focusColorTitle, setfocusColorTitle] = useState(false);
@@ -50,7 +52,7 @@ const Edit = () => {
   useEffect(() => {
     if (id) {
       axios
-        .post("/api/productDetail", { id })
+        .post<{ product: ProductType[] }>("/api/productDetail", { id })
         .then((res) => setProduct(res.data.product[0]));
     }
   }, [id]);
@@ -61,26 +63,26 @@ const Edit = () => {
 
   useEffect(() => {
     setIsColor(product?.colors && product?.colors.length > 0 ? true : false);
-  }, [color]);
+  }, [color, product?.colors]);
 
-  const saveColor = (e: any) => {
+  const saveColor = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const hex_code = colorhxcodeRef.current?.value;
     const title = colortitleRef.current?.value;
     if (title && hex_code) {
-      if (product?.colors.length > 0) {
+      if (product?.colors && product.colors.length > 0) {
         let found = false;
-        for (let index = 0; index < product?.colors?.length; index++) {
+        for (let index = 0; index < product.colors.length; index++) {
           if (
-            product?.colors[index].hex_code == hex_code ||
-            product?.colors[index].title == title
+            product.colors[index].hex_code == hex_code ||
+            product.colors[index].title == title
           ) {
             found = true;
           }
         }
         if (!found) {
           setColor({
-            id: !product?.colors?.length ? 1 : product?.colors?.length + 1,
+            id: !product.colors?.length ? '1' : product.colors.length + '1',
             hex_code,
             title,
           });
@@ -90,7 +92,7 @@ const Edit = () => {
         }
       } else {
         setColor({
-          id: !product?.colors?.length ? 1 : product?.colors?.length + 1,
+          id: product.colors && !product.colors.length ? '1' : product?.colors?.length + '1',
           hex_code,
           title,
         });
@@ -104,22 +106,22 @@ const Edit = () => {
     if (product.colors) {
       setProduct({
         ...product,
-        colors: [...product.colors, color],
+        colors: [...product.colors, color as Color],
       });
     }
-  }, [color]);
+  }, [color, product]);
 
   const update = () => {
     setIsColor(product?.colors && product?.colors.length > 0 ? true : false);
     const priceRegx = new RegExp("^[0-9]");
 
-    if (!priceRegx.test(price) && price > 0) {
+    if (price && !priceRegx.test(price) && parseInt(price) > 0) {
       setErrorPriceInput("از فرمت عددی استفاده کنید");
     } else {
       setErrorPriceInput("");
-      setIsPrice(price > 0 ? true : false);
+      setIsPrice(price && parseInt(price) > 0 ? true : false);
     }
-    if (linkImage.length > 0) {
+    if (linkImage && linkImage.length > 0) {
       if (urlRegx.test(linkImage)) {
         if (
           linkImage.includes(
@@ -139,7 +141,7 @@ const Edit = () => {
         setIsLink(false);
       }
     }
-    if (title.length >= 10) {
+    if (title && title.length >= 10) {
       setIsTitle(true);
       seterrorTitle("");
     } else {
@@ -150,9 +152,9 @@ const Edit = () => {
     setProduct({
       ...product,
       title_fa: title,
-      images: { url: [linkImage] },
-      price: price,
-      data_layer: { ...product.data_layer, category, brand },
+      image: {url:[linkImage ?? ""]},
+      price: price ? parseInt(price) : 0,
+      data_layer:{category:category??"",brand:brand??""}, 
     });
     setColorMessage("");
     setErrorPriceInput("");
@@ -166,13 +168,15 @@ const Edit = () => {
         push("/");
       });
     }
-  }, [product, isColor, isLink, isPrice, isTitle]);
+  }, [product, isColor, isLink, isPrice, isTitle, dispatch, push]);
 
-  const deleteColor = (idColor: number) => {
-    setProduct({
-      ...product,
-      colors: product.colors.filter((item: any) => item.id !== idColor),
-    });
+  const deleteColor = (idColor: string) => {
+    if (product.colors) {
+      setProduct({
+        ...product,
+        colors: product.colors.filter((item: Color) => item.id !== idColor),
+      });
+    }
   };
 
   return (
@@ -190,7 +194,6 @@ const Edit = () => {
             onBlur={() => setFocusTitle(false)}
             defaultValue={product?.title_fa || ""}
             ref={titleRef}
-            // onChange={(e) => setTitle(e.target.value)}
           />
           <span
             className={`${
@@ -207,10 +210,9 @@ const Edit = () => {
             className="border rounded p-2 w-10/12"
             placeholder="لینک عکس را با این فرمت وارد کنید :  .../https://dkstatics-public.digikala.com/digikala-products "
             required
-            defaultValue={product?.images?.url[0]}
+            defaultValue={product?.image?.url[0] || ""}
             onFocus={() => setFocusImageLink(true)}
             onBlur={() => setFocusImageLink(false)}
-            // onChange={(e) => setLink(e.target.value)}
             ref={linkImageREf}
           />
           <span
@@ -273,111 +275,110 @@ const Edit = () => {
               defaultValue={product?.price || ""}
               onFocus={() => setFocusPrice(true)}
               onBlur={() => setFocusPrice(false)}
-              // onChange={(e) => setPrice(e.target.value)}
               ref={priceRef}
             />
             <span
               className={`${
                 errorPriceInput && !focusPrice ? "visible" : "hidden"
               } text-red-500`}
-          >
-            {errorPriceInput}
-          </span>
-        </div>
-        {/* color input */}
-        <form className="flex flex-col w-full gap-4" onSubmit={saveColor}>
-          <div className="flex flex-row w-7/12 items-center border rounded p-1 dark:bg-slate-900">
-            <input
-              type="color"
-              name="hex_code"
-              className="w-1/12 ml-5"
-              onFocus={() => setFocusColorCode(true)}
-              onBlur={() => setFocusColorCode(false)}
-              ref={colorhxcodeRef}
-              required
-            />
-            <input
-              type="text"
-              name="title"
-              className="outline-none w-8/12 dark:bg-slate-900"
-              onFocus={() => setfocusColorTitle(true)}
-              onBlur={() => setfocusColorTitle(false)}
-              ref={colortitleRef}
-              placeholder="نام رنگ"
-            />
-            <button
-              type="submit"
-              className="py-2 w-3/12 bg-green-500 rounded text-white"
             >
-              ذخیره رنگ
-            </button>
+              {errorPriceInput}
+            </span>
           </div>
-          <span
-            className={`${
-              colorMessage && !focusColorCode && !focusColorTitle
-                ? "visible"
-                : "hidden"
-            } text-red-500`}
-          >
-            {colorMessage}
-          </span>
-        </form>
-      </div>
-      {/* show colors */}
-      <div className="flex flex-row items-center gap-4">
-        <label htmlFor="colors">رنگ های موجود : </label>
-        <div id="colors" className="flex flex-row gap-2 text-gray-400">
-          {product?.colors?.length > 0
-            ? product?.colors?.map((el: any) => (
-                <div
-                  className="flex flex-col border p-1 rounded min-w-[100px] gap-2"
-                  key={el.id}
-                >
-                  <div className="flex flex-row justify-end">
-                    <button onClick={() => deleteColor(el.id)}>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                        className="w-5 h-5 text-red-600"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                  <span
-                    className="w-1/2 h-6 block rounded border"
-                    style={{ backgroundColor: el.hex_code }}
-                  ></span>
-                  <span>{el.title}</span>
-                </div>
-              ))
-            : "لیست خالی می باشد."}
+          {/* color input */}
+          <form className="flex flex-col w-full gap-4" onSubmit={saveColor}>
+            <div className="flex flex-row w-7/12 items-center border rounded p-1 dark:bg-slate-900">
+              <input
+                type="color"
+                name="hex_code"
+                className="w-1/12 ml-5"
+                onFocus={() => setFocusColorCode(true)}
+                onBlur={() => setFocusColorCode(false)}
+                ref={colorhxcodeRef}
+                required
+              />
+              <input
+                type="text"
+                name="title"
+                className="outline-none w-8/12 dark:bg-slate-900"
+                onFocus={() => setfocusColorTitle(true)}
+                onBlur={() => setfocusColorTitle(false)}
+                ref={colortitleRef}
+                placeholder="نام رنگ"
+              />
+              <button
+                type="submit"
+                className="py-2 w-3/12 bg-green-500 rounded text-white"
+              >
+                ذخیره رنگ
+              </button>
+            </div>
+            <span
+              className={`${
+                colorMessage && !focusColorCode && !focusColorTitle
+                  ? "visible"
+                  : "hidden"
+              } text-red-500`}
+            >
+              {colorMessage}
+            </span>
+          </form>
         </div>
-      </div>
-      <div className="flex flex-row justify-center gap-4 text-white">
-        <button
-          className="py-2 px-8 rounded-md bg-green-400"
-          onClick={update}
-        >
-          ذخیره تغییرات{" "}
-        </button>
-        <button
-          className="py-2 px-8 rounded-md bg-red-400"
-          onClick={() => push("/profile/create")}
-        >
-          انصراف
-        </button>
+        {/* show colors */}
+        <div className="flex flex-row items-center gap-4">
+          <label htmlFor="colors">رنگ های موجود : </label>
+          <div id="colors" className="flex flex-row gap-2 text-gray-400">
+            {product?.colors && product.colors.length > 0
+              ? product.colors.map((el: Color) => (
+                  <div
+                    className="flex flex-col border p-1 rounded min-w-[100px] gap-2"
+                    key={el.id}
+                  >
+                    <div className="flex flex-row justify-end">
+                      <button onClick={() => deleteColor(el.id)}>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth="1.5"
+                          stroke="currentColor"
+                          className="w-5 h-5 text-red-600"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                    <span
+                      className="w-1/2 h-6 block rounded border"
+                      style={{ backgroundColor: el.hex_code }}
+                    ></span>
+                    <span>{el.title}</span>
+                  </div>
+                ))
+              : "لیست خالی می باشد."}
+          </div>
+        </div>
+        <div className="flex flex-row justify-center gap-4 text-white">
+          <button
+            className="py-2 px-8 rounded-md bg-green-400"
+            onClick={update}
+          >
+            ذخیره تغییرات
+          </button>
+          <button
+            className="py-2 px-8 rounded-md bg-red-400"
+            onClick={() => push("/profile/create")}
+          >
+            انصراف
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default Edit;

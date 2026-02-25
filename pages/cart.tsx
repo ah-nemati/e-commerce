@@ -3,17 +3,18 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CartItem } from "../components/Tools/CartItem";
 import PersianNumber from "../Hooks/PersianNumber";
-import { State, CartItem as CartItemType } from "../Store/types";
+import { State, ProductType as CartItemType } from "../types/index";
 import { Dispatch } from "redux";
-import { Action } from "../Store/types";
+import { Action } from "../types/index";
 
 const Cart = () => {
   const cartProduct = useSelector((state: State) => state.cart);
   const [sumPrice, setsumPrice] = useState<number>(0);
+  const [discount, setDiscount] = useState<number>(0);
 
   useEffect(() => {
     setsumPrice(
-      cartProduct.reduce((prev, curr) => prev + curr.price * curr.Quanity, 0)
+      cartProduct.reduce((prev, curr) => prev + curr.price * curr.Quantity, 0)
     );
   }, [cartProduct]);
 
@@ -38,7 +39,7 @@ const Cart = () => {
             cartProduct.map((item: CartItemType) => (
               <CartItem
                 cartProduct={cartProduct}
-                key={item.id}
+                key={item._id}
                 product={item}
                 dispatch={dispatch}
               />
@@ -66,16 +67,16 @@ const Cart = () => {
               </div>
             </div>
             <div className="flex justify-between">
-              <span> تخفیf :</span>
+              <span> تخفیف :</span>
               <span className="text-gray-800 dark:text-white">
-                {PersianNumber(500000)} تومان
+                {PersianNumber(discount)} تومان
               </span>
             </div>
             <hr />
             <div className="flex justify-between">
               <span> قیمت نهایی :</span>
               <span className="text-orange-500">
-                {sumPrice ? PersianNumber(sumPrice - 500000) : "۰"} تومان
+                {sumPrice ? PersianNumber(sumPrice - discount) : "۰"} تومان
               </span>
             </div>
           </div>

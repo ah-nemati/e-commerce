@@ -1,8 +1,17 @@
-import { memo, useState } from "react";
+import { memo, useState, FC, ChangeEvent, MouseEvent, ReactNode } from "react";
 
-const Input = ({ data, jsx, aLink, label, value, onChange }) => {
+interface InputProps {
+    data: string;
+    jsx: ReactNode;
+    aLink?: ReactNode;
+    label?: string;
+    value: string;
+    onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+}
+
+const Input: FC<InputProps> = ({ data, jsx, aLink, label, value, onChange }) => {
   const [IshowPasword, setIshowPasword] = useState(false);
-  const handleShowPasword = (e) => {
+  const handleShowPasword = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (data === "password") {
       setIshowPasword(!IshowPasword);
@@ -24,7 +33,7 @@ const Input = ({ data, jsx, aLink, label, value, onChange }) => {
         >
           <input
             className="flex-1 outline-none dark:bg-slate-800 dark:text-white bg-gray-100 border-0"
-            type={data === "password" ? (IshowPasword ? "text" : data) : data}
+            type={data === "password" ? (IshowPasword ? "text" : "password") : data}
             id={data}
             value={value}
             onChange={onChange}

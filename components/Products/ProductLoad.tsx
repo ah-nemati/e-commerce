@@ -26,7 +26,7 @@ const LoadCard: React.FC = () => (
 export const ProductLoad: React.FC = () => {
   return (
     <>
-      {[...Array(8)].map((_, index) => (
+      {[...Array(8)].map((_, index: number) => (
         <LoadCard key={index} />
       ))}
     </>

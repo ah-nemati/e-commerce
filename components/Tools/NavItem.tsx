@@ -1,4 +1,13 @@
-const NavItem = ({ d1, d2, value, onClick }) => {
+import { FC } from "react";
+
+interface NavItemProps {
+  d1: string;
+  d2?: string;
+  value: string;
+  onClick?: () => void;
+}
+
+const NavItem:FC<NavItemProps> = ({ d1, d2, value, onClick }) => {
   return (
     <div className="flex p-3 hover:text-orange-500">
         <div

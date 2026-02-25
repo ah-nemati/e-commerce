@@ -4,32 +4,10 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import PersianNumber from "../../Hooks/PersianNumber";
 import { AddToCart, Notify } from "../../Store/Actions";
-import { State, CartItem } from "../../Store/types";
-
-// Based on the usage in this component, the product prop has a more detailed structure
-// than the Product type in Store/types.ts.
-interface ProductProp {
-  id: string;
-  images: {
-    url: string[];
-  };
-  data_layer: {
-    brand: string;
-  };
-  colors: {
-    id: React.Key;
-    hex_code: string;
-  }[];
-  title_fa: string;
-  rating: {
-    rate: number;
-    count: number;
-  };
-  price: number;
-}
+import { ProductType, State } from "@/types";
 
 interface Props {
-  product: ProductProp;
+  product: ProductType;
 }
 
 export const ProductItem: React.FC<Props> = ({ product }) => {
@@ -44,17 +22,16 @@ export const ProductItem: React.FC<Props> = ({ product }) => {
   };
 
   const handleAddToCart = (): void => {
-    const isAlreadyInCart = cartProduct.some((item: CartItem) => item.id === product.id);
+    const isAlreadyInCart = cartProduct.some((item: ProductType) => item.id === product.id);
 
     if (isAlreadyInCart) {
       dispatch(Notify("error", "کالای مورد نظر در سبد خرید موجود است !"));
     } else {
-      // The AddToCart action expects a CartItem, but the product prop has a different shape.
-      // Casting to 'any' to preserve the original behavior until the Redux store and actions are fully typed.
-      dispatch(AddToCart(product as any));
+      dispatch(AddToCart(product));
       dispatch(Notify("success", "کالای مورد نظر به سبد خرید افزوده شد"));
     }
   };
+
   return (
     <>
       <Link
@@ -70,7 +47,7 @@ export const ProductItem: React.FC<Props> = ({ product }) => {
           {/* cartImage */}
           <div className="">
             <Image
-              src={product.images.url[0]}
+              src={product.image.url[0]}
               width={300}
               height={300}
               alt="product"
@@ -140,7 +117,7 @@ export const ProductItem: React.FC<Props> = ({ product }) => {
                 </svg>
               </button>
               <span className="text-gray-600 dark:text-white">
-                {PersianNumber(product.price)} تومان
+                {product.price && PersianNumber(product.price)} تومان
               </span>
             </div>
           </div>
