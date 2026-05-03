@@ -1,20 +1,33 @@
-import ConnectDB from "../../utils/mongodb";
 import bcrypt from "bcrypt";
-import user from "../../utils/models/user";
-
-ConnectDB();
+import { readDB, writeDB } from "../../utils/db";
 
 export default async function signup(req, res) {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const findUser = await user.findOne({ email });
-  if (!findUser) {
-    const newUser = new user({
+    const users = await readDB("users.json");
+
+    const findUser = users.find((user) => user.email === email);
+
+    if (findUser) {
+      return res.json({ error: "user exists!" });
+    }
+
+    const newUser = {
+      id: Date.now(),
       email,
       password: await bcrypt.hash(password, 12),
-    });
+      role: "user",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
 
-    await newUser.save();
-    return res.json({ success: "loged in !" });
-  } else return res.json({ error: "user is exist !" });
+    users.push(newUser);
+
+    await writeDB("users.json", users);
+
+    return res.json({ success: "signed up!" });
+  } catch (error) {
+    return res.status(500).json({ status: "error" });
+  }
 }

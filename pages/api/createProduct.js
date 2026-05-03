@@ -1,23 +1,29 @@
-import products from "../../utils/models/products";
-import ConnectDB from "../../utils/mongodb";
-
-ConnectDB();
+import { readDB, writeDB } from "../../utils/db";
 
 export default async function Create(req, res) {
-  const date=new Date()
-  const { color, link, title, brand, category, price } = req.body;
-  const newProduct = new products({
-    id: date.getTime(),
-    title_fa: title,
-    images: { url: link },
-    data_layer: {
-      brand: brand,
-      category: category,
-    },
-    price: price,
-    colors: color,
-  });
+  try {
+    const { color, link, title, brand, category, price } = req.body;
 
-  newProduct.save();
-  return res.json({ success: "loged in !" });
+    const products = await readDB("products.json");
+
+    const newProduct = {
+      id: Date.now(),
+      title_fa: title,
+      images: { url: link },
+      data_layer: {
+        brand,
+        category,
+      },
+      price,
+      colors: color,
+    };
+
+    const updated = [...products, newProduct];
+
+    await writeDB(updated);
+
+    return res.status(201).json({ success: "created!" });
+  } catch (error) {
+    return res.status(500).json({ status: "error" });
+  }
 }

@@ -1,12 +1,10 @@
-import products from "../../utils/models/products";
-import ConnectDB from "../../utils/mongodb";
-
-ConnectDB();
+import { readDB } from "../../utils/db";
 
 export default async function getProduct(req, res) {
-  const product = await products.find();
-  if (product) {
-    return res.status(200).json({ product });
+  try {
+    const products = await readDB("products.json");
+    return res.status(200).json({ product: products });
+  } catch (error) {
+    return res.status(500).json({ status: "error" });
   }
-  return res.json({ status: "error" });
 }

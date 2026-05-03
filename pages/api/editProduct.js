@@ -1,21 +1,20 @@
-import products from "../../utils/models/products";
-import ConnectDB from "../../utils/mongodb";
-ConnectDB();
+import { readDB, writeDB } from "../../utils/db";
+
 export default async function Edit(req, res) {
-  const { id, colors, images, title_fa, data_layer, price } = await req?.body
-    ?.product;
-  await products.findOneAndUpdate(
-    { id },
-    {
-      title_fa,
-      images,
-      data_layer,
-      price,
-      colors,
-    },
-    {
-      returnOriginal: false,
-    }
-  );
-  return res.json({ success: "updated !" });
+  try {
+    const { product } = req.body;
+    const { id, colors, images, title_fa, data_layer, price } = product;
+
+    const products = await readDB("products.json");
+
+    const updatedProducts = products.map((p) =>
+      p.id == id ? { ...p, title_fa, images, data_layer, price, colors } : p,
+    );
+
+    await writeDB(updatedProducts);
+
+    return res.json({ success: "updated!" });
+  } catch (error) {
+    return res.status(500).json({ status: "error" });
+  }
 }
