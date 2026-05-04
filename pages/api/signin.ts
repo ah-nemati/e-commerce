@@ -53,10 +53,7 @@ export default async function handler(
     // حذف password از خروجی
     const { password: _, ...userWithoutPassword } = findUser;
 
-    return res.status(200).json({
-      success: true,
-      user: userWithoutPassword,
-    });
+    return res.status(200).json(userWithoutPassword);
   } catch (error) {
     console.error(error);
     return res.status(500).json({

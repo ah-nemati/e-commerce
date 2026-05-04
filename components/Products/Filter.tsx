@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SetFilter } from "../../Store/Actions";
 import { PriceRange } from "../Tools/PriceRange";
-import {  ProductType, State } from "../../types/index";
+import { ProductType, State } from "../../types/index";
 
 const Filter: React.FC = () => {
   const [showBrandBtn, setshowBrandBtn] = useState<boolean>(true);
@@ -44,11 +44,13 @@ const Filter: React.FC = () => {
       if (brand.length > 0) {
         dispatch(
           SetFilter(
-            products.filter((item: ProductType) => brand.includes(item.data_layer.brand))
-          )
+            products.filter((item: ProductType) =>
+              brand.includes(item.data_layer.brand),
+            ),
+          ),
         );
       } else {
-        dispatch(SetFilter([]))
+        dispatch(SetFilter([]));
       }
     }
   }, [brand, products, dispatch]);
@@ -118,9 +120,10 @@ const Filter: React.FC = () => {
             dispatch(
               SetFilter(
                 products.filter(
-                  (item: ProductType) => item.data_layer.category === "گوشی موبایل"
-                )
-              )
+                  (item: ProductType) =>
+                    item.data_layer.category === "گوشی موبایل",
+                ),
+              ),
             );
             setIsMobile(true);
             setIsLaptop(false);
@@ -162,9 +165,10 @@ const Filter: React.FC = () => {
             dispatch(
               SetFilter(
                 products.filter(
-                  (item: ProductType) => item.data_layer.category === "لپ تاپ و الترابوک"
-                )
-              )
+                  (item: ProductType) =>
+                    item.data_layer.category === "لپ تاپ و الترابوک",
+                ),
+              ),
             );
             setIsMobile(false);
             setIsLaptop(true);
@@ -207,9 +211,9 @@ const Filter: React.FC = () => {
                 products.filter(
                   (item: ProductType) =>
                     item.data_layer.category !== "لپ تاپ و الترابوک" &&
-                    item.data_layer.category !== "گوشی موبایل"
-                )
-              )
+                    item.data_layer.category !== "گوشی موبایل",
+                ),
+              ),
             );
             setIsMobile(false);
             setIsLaptop(false);

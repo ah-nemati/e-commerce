@@ -13,8 +13,8 @@ import { ChangeEvent, FormEvent, useState } from "react";
 import { NextPage } from "next";
 
 const Signin: NextPage = () => {
-  const [email, setemail] = useState<string>("");
-  const [password, setpassword] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -25,7 +25,7 @@ const Signin: NextPage = () => {
         dispatch(Notify("error", validate.USER_AUTH_ERROR));
       } else {
         dispatch(
-          Notify("success", email.split("@")[0] + validate.USER_AUTH_SUCCESS)
+          Notify("success", email.split("@")[0] + validate.USER_AUTH_SUCCESS),
         );
         dispatch(Auth(res.data));
         localStorage.setItem("email", res.data.email);
@@ -74,7 +74,7 @@ const Signin: NextPage = () => {
                   id="email"
                   value={email}
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setemail(e.target.value)
+                    setEmail(e.target.value)
                   }
                   required
                 />
@@ -84,7 +84,7 @@ const Signin: NextPage = () => {
               data="password"
               label={"پسورد"}
               value={password}
-              onChange={(e) => setpassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               jsx={
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

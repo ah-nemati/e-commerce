@@ -22,7 +22,7 @@ export const Footer = () => {
               width={100}
               height={100}
               alt="originalProducts"
-              priority={true}
+              priority
             />
           </span>
           <span>ضمانت اصل بودن کالا</span>
@@ -34,7 +34,7 @@ export const Footer = () => {
               width={100}
               height={100}
               alt="daysReturn"
-              priority={true}
+              priority
             />
           </span>
           <span> ضمانت بازگشت کالا</span>
@@ -46,7 +46,7 @@ export const Footer = () => {
               width={100}
               height={100}
               alt="support"
-              priority={true}
+              priority
             />
           </span>
           <span>پشتیبانی ۲۴ ﺳﺎﻋﺘﻪ</span>
@@ -58,7 +58,7 @@ export const Footer = () => {
               width={100}
               height={100}
               alt="cashOnDelivery"
-              priority={true}
+              priority
             />
           </span>
           <span>امکان پرداخت در محل</span>
@@ -109,31 +109,16 @@ export const Footer = () => {
           <h3 className="md:py-0 py-4">همراه ما باشید !</h3>
           <div className="flex justify-between pl-12">
             <button className="w-10 h-10">
-              <Image
-                src={aparat}
-                alt="aparat"
-                width={100}
-                height={100}
-              />
+              <Image src={aparat} alt="aparat" width={100} height={100} />
             </button>
             <button className="w-10 h-10">
-              <Image
-                src={linkedin}
-                alt="linkedin"
-                width={100}
-                height={100}
-              />
+              <Image src={linkedin} alt="linkedin" width={100} height={100} />
             </button>
             <button className="w-10 h-10">
-              <Image
-                src={instagram}
-                alt="instagram"
-                width={100}
-                height={100}
-              />
+              <Image src={instagram} alt="instagram" width={100} height={100} />
             </button>
             <button className="w-10 h-10">
-              <Image  src={twitter} alt="twitter" width={100} height={100} />
+              <Image src={twitter} alt="twitter" width={100} height={100} />
             </button>
           </div>
           <div className="flex flex-col gap-4">

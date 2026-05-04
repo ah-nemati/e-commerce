@@ -23,7 +23,6 @@ export const PriceRange: FC = () => {
       setMinValue(maxvalue - minGap);
       setMaxValue(minvalue + minGap);
     }
-console.log(products);
 
     // if (products) {
     //   dispatch(

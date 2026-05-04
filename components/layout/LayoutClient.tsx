@@ -1,13 +1,15 @@
+"use client";
+
 import { ReactNode, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { State } from "../../types";
 import { Toast } from "../Tools/Toast";
 import { Footer } from "./Footer";
 import { Navbar } from "./Navbar";
-import { State } from "../../types";
 
-export const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
+export default function LayoutClient({ children }: { children: ReactNode }) {
   const [IsShow, setIsShow] = useState(false);
-  const { message,status } = useSelector((state: State) => state.message);
+  const { message, status } = useSelector((state: State) => state.message);
 
   const notifyColor = {
     error: { color: "red", bg: "#ffd0d0" },
@@ -54,20 +56,19 @@ export const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
   useEffect(() => {
     if (IsShow) {
       const timer = setTimeout(() => {
-        setIsShow(!IsShow);
+        setIsShow(false);
       }, 5000);
 
-      return () => {
-        clearTimeout(timer);
-      };
+      return () => clearTimeout(timer);
     }
   }, [IsShow]);
 
   const handelShow = () => setIsShow(!IsShow);
 
   return (
-    <div dir="rtl" className="bg-gray-100 dark:bg-slate-900">
+    <div dir="rtl" className="bg-gray-100 dark:bg-slate-900 min-h-screen">
       <Navbar />
+
       {status === "error" && IsShow && (
         <Toast
           msg={message}
@@ -78,6 +79,7 @@ export const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
           svg={svg.error}
         />
       )}
+
       {status === "success" && IsShow && (
         <Toast
           msg={message}
@@ -88,8 +90,10 @@ export const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
           svg={svg.success}
         />
       )}
+
       <main>{children}</main>
+
       <Footer />
     </div>
   );
-};
+}
