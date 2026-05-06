@@ -1,74 +1,92 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { SetFilter } from "../../Store/Actions";
+import React, { useEffect, useState, useCallback } from "react";
 import { PriceRange } from "../Tools/PriceRange";
-import { ProductType, State } from "../../types/index";
+import { useSelector } from "react-redux";
+import { State } from "../../types/index";
 
-const Filter: React.FC = () => {
+type Props = {
+  params: any;
+  setParams: React.Dispatch<React.SetStateAction<any>>;
+};
+
+const Filter: React.FC<Props> = ({ params, setParams }) => {
+  // حفظ تمامی Stateهای اصلی UI
   const [showBrandBtn, setshowBrandBtn] = useState<boolean>(true);
   const [displayBrand, setdisplaybrand] = useState<string>("none");
   const [showRangeBtn, setshowRangeBtn] = useState<boolean>(true);
   const [displayRange, setdisplayRange] = useState<string>("none");
-  const [brand, setBrand] = useState<string[]>([]);
 
-  const dispatch = useDispatch();
+  // استیت برند برای مدیریت چک‌باکس‌ها
+  const [brand, setBrand] = useState<string[]>(
+    params.brand ? params.brand.split(",") : [],
+  );
 
-  const { products, theme } = useSelector((state: State) => state);
+  const { theme } = useSelector((state: State) => state);
 
-  const handelShowBrand = (): void => {
-    setshowBrandBtn(!showBrandBtn);
-  };
+  // هندلرهای نمایش منوها (بدون تغییر)
+  const handelShowBrand = (): void => setshowBrandBtn(!showBrandBtn);
+  const handelShowRange = (): void => setshowRangeBtn(!showRangeBtn);
 
-  const handelShowRange = (): void => {
-    setshowRangeBtn(!showRangeBtn);
-  };
+  // اصلاح منطق برند برای جلوگیری از لوپ
   const saveBrandName = (str: string): void => {
-    brand.includes(str)
-      ? setBrand(brand.filter((item) => item != str))
-      : setBrand([...brand, str]);
+    const newBrands = brand.includes(str)
+      ? brand.filter((item) => item !== str)
+      : [...brand, str];
+
+    setBrand(newBrands);
+    setParams((prev: any) => ({
+      ...prev,
+      brand: newBrands.join(","),
+      page: 1,
+    }));
   };
+
   useEffect(() => {
-    if (showBrandBtn) {
-      setdisplaybrand("none");
-    } else setdisplaybrand("flex");
+    setdisplaybrand(showBrandBtn ? "none" : "flex");
   }, [showBrandBtn]);
 
   useEffect(() => {
-    if (showRangeBtn) {
-      setdisplayRange("none");
-    } else setdisplayRange("flex");
+    setdisplayRange(showRangeBtn ? "none" : "flex");
   }, [showRangeBtn]);
 
-  useEffect(() => {
-    if (Array.isArray(products)) {
-      if (brand.length > 0) {
-        dispatch(
-          SetFilter(
-            products.filter((item: ProductType) =>
-              brand.includes(item.data_layer.brand),
-            ),
-          ),
-        );
-      } else {
-        dispatch(SetFilter([]));
-      }
-    }
-  }, [brand, products, dispatch]);
+  // متد کمکی برای تغییر دسته‌بندی
+  const handleCategoryChange = (cat: string) => {
+    setParams((prev: any) => ({
+      ...prev,
+      category: cat,
+      page: 1,
+    }));
+  };
 
-  const [IsMobile, setIsMobile] = useState<boolean>(false);
-  const [IsLaptop, setIsLaptop] = useState<boolean>(false);
-  const [IsOther, setIsOther] = useState<boolean>(false);
-  const [IsAll, setIsAll] = useState<boolean>(true);
+  // جلوگیری از تغییر رفرنس تابع قیمت[cite: 3]
+  const handlePriceChange = useCallback(
+    (min: number, max: number) => {
+      setParams((prev: any) => {
+        if (prev.minPrice === String(min) && prev.maxPrice === String(max))
+          return prev;
+        return {
+          ...prev,
+          minPrice: String(min),
+          maxPrice: String(max),
+          page: 1,
+        };
+      });
+    },
+    [setParams],
+  );
+
+  // متغیرهای کمکی برای تشخیص وضعیت فعال (Active)
+  const IsAll = params.category === "";
+  const IsMobile = params.category === "گوشی موبایل";
+  const IsLaptop = params.category === "لپ تاپ و الترابوک";
+  const IsOther = params.category === "other";
 
   return (
-    <div
-      className="flex dark:bg-slate-900 dark:text-white bg-white flex-col gap-4 w-full ml-4 rounded-md p-6 text-gray-700
-    text-lg"
-    >
+    <div className="flex dark:bg-slate-900 dark:text-white bg-white flex-col gap-4 w-full ml-4 rounded-md p-6 text-gray-700 text-lg">
       <h1 className="text-2xl text-orange-600">دسته بندی</h1>
+
+      {/* دکمه همه محصولات - حفظ دقیق SVG و دایره خلفی */}
       <button
-        className="flex gap-2 relative text-gray-400 rounded-sm hover:bg-gray-50 dark:hover:bg-slate-600 p-1
-        text-base"
+        className="flex gap-2 relative text-gray-400 rounded-sm hover:bg-gray-50 dark:hover:bg-slate-600 p-1 text-base text-right"
         style={{
           color: IsAll
             ? theme === "dark"
@@ -77,15 +95,7 @@ const Filter: React.FC = () => {
             : "rgb(107,114,128)",
           fontWeight: IsAll ? "bold" : "normal",
         }}
-        onClick={() => {
-          if (Array.isArray(products)) {
-            dispatch(SetFilter(products.filter((item: ProductType) => item)));
-            setIsMobile(false);
-            setIsLaptop(false);
-            setIsOther(false);
-            setIsAll(true);
-          }
-        }}
+        onClick={() => handleCategoryChange("")}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -104,9 +114,10 @@ const Filter: React.FC = () => {
         <span className="absolute dark:bg-slate-300 bg-gray-100 w-6 h-6 rounded-full -right-[8px] -top-[8px]"></span>
         همه محصولات
       </button>
+
+      {/* دکمه تلفن همراه */}
       <button
-        className="flex gap-2 relative text-gray-400 rounded-sm hover:bg-gray-50 dark:hover:bg-slate-600 p-1
-        text-base"
+        className="flex gap-2 relative text-gray-400 rounded-sm hover:bg-gray-50 dark:hover:bg-slate-600 p-1 text-base text-right"
         style={{
           color: IsMobile
             ? theme === "dark"
@@ -115,22 +126,7 @@ const Filter: React.FC = () => {
             : "rgb(107,114,128)",
           fontWeight: IsMobile ? "bold" : "normal",
         }}
-        onClick={() => {
-          if (Array.isArray(products)) {
-            dispatch(
-              SetFilter(
-                products.filter(
-                  (item: ProductType) =>
-                    item.data_layer.category === "گوشی موبایل",
-                ),
-              ),
-            );
-            setIsMobile(true);
-            setIsLaptop(false);
-            setIsOther(false);
-            setIsAll(false);
-          }
-        }}
+        onClick={() => handleCategoryChange("گوشی موبایل")}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -149,9 +145,10 @@ const Filter: React.FC = () => {
         <span className="absolute dark:bg-slate-300 bg-gray-100 w-6 h-6 rounded-full -right-[8px] -top-[8px]"></span>
         تلفن همراه
       </button>
+
+      {/* دکمه لپ تاپ */}
       <button
-        className="flex gap-2 relative text-gray-400 rounded-sm hover:bg-gray-50 dark:hover:bg-slate-600 p-1 
-    text-base"
+        className="flex gap-2 relative text-gray-400 rounded-sm hover:bg-gray-50 dark:hover:bg-slate-600 p-1 text-base text-right"
         style={{
           color: IsLaptop
             ? theme === "dark"
@@ -160,22 +157,7 @@ const Filter: React.FC = () => {
             : "rgb(107,114,128)",
           fontWeight: IsLaptop ? "bold" : "normal",
         }}
-        onClick={() => {
-          if (Array.isArray(products)) {
-            dispatch(
-              SetFilter(
-                products.filter(
-                  (item: ProductType) =>
-                    item.data_layer.category === "لپ تاپ و الترابوک",
-                ),
-              ),
-            );
-            setIsMobile(false);
-            setIsLaptop(true);
-            setIsOther(false);
-            setIsAll(false);
-          }
-        }}
+        onClick={() => handleCategoryChange("لپ تاپ و الترابوک")}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -194,8 +176,10 @@ const Filter: React.FC = () => {
         <span className="absolute dark:bg-slate-300 bg-gray-100 w-6 h-6 rounded-full -right-[9px] -top-[9px]"></span>
         لپ تاپ
       </button>
+
+      {/* دکمه سایر */}
       <button
-        className="flex gap-2 relative text-gray-400 hover:bg-gray-50 rounded-sm dark:hover:bg-slate-600 p-1 text-base"
+        className="flex gap-2 relative text-gray-400 hover:bg-gray-50 rounded-sm dark:hover:bg-slate-600 p-1 text-base text-right"
         style={{
           color: IsOther
             ? theme === "dark"
@@ -204,23 +188,7 @@ const Filter: React.FC = () => {
             : "rgb(107,114,128)",
           fontWeight: IsOther ? "bold" : "normal",
         }}
-        onClick={() => {
-          if (Array.isArray(products)) {
-            dispatch(
-              SetFilter(
-                products.filter(
-                  (item: ProductType) =>
-                    item.data_layer.category !== "لپ تاپ و الترابوک" &&
-                    item.data_layer.category !== "گوشی موبایل",
-                ),
-              ),
-            );
-            setIsMobile(false);
-            setIsLaptop(false);
-            setIsOther(true);
-            setIsAll(false);
-          }
-        }}
+        onClick={() => handleCategoryChange("other")}
       >
         <span className="w-5 h-5 z-10">
           <svg
@@ -243,12 +211,13 @@ const Filter: React.FC = () => {
       </button>
 
       <h1 className="text-2xl text-orange-600 mt-6">فیلتر</h1>
+
+      {/* بخش برند */}
       <button
-        className="flex justify-between dark:text-white text-gray-700 dark:hover:bg-slate-600 hover:bg-gray-50
-         rounded-md pt-2"
+        className="flex justify-between dark:text-white text-gray-700 dark:hover:bg-slate-600 hover:bg-gray-50 rounded-md pt-2"
         onClick={handelShowBrand}
       >
-        <span className="flex gap-2 relative">
+        <span className="flex gap-2 relative text-right">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-5 w-5 z-10"
@@ -294,56 +263,30 @@ const Filter: React.FC = () => {
           </svg>
         )}
       </button>
+
       <ul
         className="flex-col text-base gap-2 h-48 overflow-y-scroll"
         style={{ display: displayBrand }}
       >
-        <button className="flex items-center gap-6 border-b p-2">
-          <input
-            onClick={() => saveBrandName("اپل")}
-            type="checkbox"
-            className="scale-150"
-          />
-          <span>اپل</span>
-        </button>
-        <li className="flex items-center gap-6 border-b p-2">
-          <input
-            onClick={() => saveBrandName("سامسونگ")}
-            type="checkbox"
-            className="scale-150"
-          />{" "}
-          <span>سامسونگ</span>
-        </li>
-        <li className="flex items-center gap-6 border-b p-2">
-          <input
-            onClick={() => saveBrandName("شیائومی")}
-            type="checkbox"
-            className="scale-150"
-          />{" "}
-          <span>شیائومی</span>
-        </li>
-        <li className="flex items-center gap-6 border-b p-2">
-          <input
-            onClick={() => saveBrandName("ایسوس")}
-            type="checkbox"
-            className="scale-150"
-          />{" "}
-          <span>ایسوس</span>
-        </li>
-        <li className="flex items-center gap-6 border-b p-2">
-          <input
-            onClick={() => saveBrandName("لنوو")}
-            type="checkbox"
-            className="scale-150"
-          />{" "}
-          <span>لنوو</span>
-        </li>
+        {["اپل", "سامسونگ", "شیائومی", "ایسوس", "لنوو"].map((b) => (
+          <li key={b} className="flex items-center gap-6 border-b p-2">
+            <input
+              type="checkbox"
+              checked={brand.includes(b)}
+              onChange={() => saveBrandName(b)}
+              className="scale-150"
+            />
+            <span>{b}</span>
+          </li>
+        ))}
       </ul>
+
+      {/* بخش محدوده قیمت */}
       <button
         className="flex justify-between pt-2 dark:text-white text-gray-700 dark:hover:bg-slate-600 hover:bg-gray-50 rounded-md"
         onClick={handelShowRange}
       >
-        <span className="flex gap-2 relative">
+        <span className="flex gap-2 relative text-right">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-5 w-5 z-10"
@@ -389,8 +332,9 @@ const Filter: React.FC = () => {
           </svg>
         )}
       </button>
+
       <div style={{ display: displayRange }} className="flex flex-col gap-2">
-        <PriceRange />
+        <PriceRange onChange={handlePriceChange} />
       </div>
     </div>
   );

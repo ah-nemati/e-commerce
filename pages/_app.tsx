@@ -1,4 +1,4 @@
-import "../styles/output.css";
+import "../styles/globals.css";
 import { Provider } from "react-redux";
 import LayoutClient from "@/components/layout/LayoutClient";
 import store from "@/Store";

@@ -1,23 +1,22 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import bcrypt from "bcrypt";
-import { readDB } from "../../utils/db";
+import { readDB } from "@/utils/db";
+import { signToken } from "@/utils/auth";
+import { setCookie } from "@/utils/cookie";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  // فقط POST
   if (req.method !== "POST") {
-    return res.status(405).json({
-      success: false,
-      message: "Method not allowed",
-    });
+    return res
+      .status(405)
+      .json({ success: false, message: "Method not allowed" });
   }
 
   try {
     const { email, password } = req.body;
 
-    // validation
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -25,40 +24,40 @@ export default async function handler(
       });
     }
 
-    // خواندن از JSON
     const users = await readDB("users.json");
 
-    const findUser = users.find((user: any) => user.email === email);
+    const user = users.find((u: any) => u.email === email);
 
-    if (!findUser) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid credentials",
-      });
+    if (!user) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
     }
 
-    // بررسی پسورد
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      findUser.password || "",
-    );
+    const isValid = await bcrypt.compare(password, user.password);
 
-    if (!isPasswordCorrect) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid credentials",
-      });
+    if (!isValid) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
     }
 
-    // حذف password از خروجی
-    const { password: _, ...userWithoutPassword } = findUser;
-
-    return res.status(200).json(userWithoutPassword);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
+    // 👇 فقط اطلاعات مهم داخل token
+    const token = signToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
     });
+
+    res.setHeader("Set-Cookie", setCookie(token));
+
+    const { password: _, ...safeUser } = user;
+
+    return res.status(200).json({
+      success: true,
+      user: safeUser,
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 }

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { useEffect, useState, FC } from "react";
 import { Dispatch } from "redux";
-import PersianNumber from "../../Hooks/PersianNumber";
+import PersianNumber from "../../hooks/PersianNumber";
 import {
   decreaseNumOfProduct,
   increaseNumOfProduct,

@@ -2,50 +2,75 @@ import Filter from "@/components/Products/Filter";
 import { ProductItem } from "@/components/Products/ProductItem";
 import { ProductLoad } from "@/components/Products/ProductLoad";
 import type { NextPage } from "next";
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { ProductType, State } from "../types/index";
+import { useCallback, useEffect, useState } from "react";
+import { ProductType } from "../types";
+
+type Params = {
+  sort: string;
+  search: string;
+  category: string;
+  brand: string;
+  minPrice: string;
+  maxPrice: string;
+  page: number;
+  limit: number;
+};
+
+const SORT_OPTIONS = [
+  { label: "پربازدید ترین", value: "visited" },
+  { label: "ارزان ترین", value: "price_asc" },
+  { label: "گران ترین", value: "price_desc" },
+  { label: "محبوب ترین", value: "rating" },
+];
 
 const Home: NextPage = () => {
-  const { theme } = useSelector((state: State) => state);
-
   const [products, setProducts] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
-  const [params, setParams] = useState({
+  const [params, setParams] = useState<Params>({
     sort: "visited",
     search: "",
+    category: "",
+    brand: "",
+    minPrice: "",
+    maxPrice: "",
     page: 1,
     limit: 10,
   });
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
-
-    const query = new URLSearchParams({
-      sort: params.sort,
-      search: params.search,
-      page: String(params.page),
-      limit: String(params.limit),
-    }).toString();
-
     try {
-      const res = await fetch(`/api/products?${query}`);
+      const buildQuery = new URLSearchParams({
+        sort: params.sort,
+        search: params.search,
+        category: params.category,
+        brand: params.brand,
+        minPrice: params.minPrice,
+        maxPrice: params.maxPrice,
+        page: String(params.page),
+        limit: String(params.limit),
+      }).toString();
+
+      const res = await fetch(`/api/products?${buildQuery}`);
       const data = await res.json();
+
       setProducts(data.products || []);
+      setHasMore(data.hasMore || false);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [params]); // تابع فقط وقتی پارامترها واقعاً تغییر کنند عوض می‌شود[cite: 2]
 
   useEffect(() => {
     fetchProducts();
-  }, [params]);
+  }, [fetchProducts]);
 
   useEffect(() => {
-    const handleSearch = (e: any) => {
+    const handleSearch = (e: CustomEvent<string>) => {
       setParams((prev) => ({
         ...prev,
         search: e.detail,
@@ -53,25 +78,31 @@ const Home: NextPage = () => {
       }));
     };
 
-    window.addEventListener("product-search", handleSearch);
-
+    window.addEventListener("product-search", handleSearch as EventListener);
     return () => {
-      window.removeEventListener("product-search", handleSearch);
+      window.removeEventListener(
+        "product-search",
+        handleSearch as EventListener,
+      );
     };
   }, []);
+
+  const getSortClass = (value: string) =>
+    params.sort === value
+      ? "font-bold text-gray-700 dark:text-white"
+      : "font-normal text-gray-500";
 
   return (
     <div className="bg-gray-100 dark:text-white dark:bg-gray-500">
       <div className="flex justify-center md:p-14 p-2 bg-gray-100 dark:bg-slate-800">
         <div className="xl:flex hidden w-full xl:w-1/4 h-fit xl:sticky xl:top-24">
-          <Filter />
+          <Filter params={params} setParams={setParams} />
         </div>
 
         <div className="flex flex-col w-full xl:w-3/4 gap-4">
-          <div className="flex gap-3 dark:bg-slate-900 dark:text-white text-gray-500 bg-white rounded p-3 items-center">
-            <span className="bg-orange-100 dark:bg-slate-700 p-1 rounded ">
+          <div className="flex gap-3 dark:bg-slate-900 text-gray-500 bg-white rounded p-3 items-center">
+            <span className="bg-orange-100 dark:bg-slate-700 p-1 rounded">
               <svg
-                direction={"rtl"}
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-7 w-7 stroke-orange-600"
                 fill="none"
@@ -87,90 +118,21 @@ const Home: NextPage = () => {
               </svg>
             </span>
 
-            <div className="flex gap-6 mr-2 text-gray-500">
-              <button
-                className="relative"
-                style={{
-                  color:
-                    params.sort === "visited"
-                      ? theme === "dark"
-                        ? "white"
-                        : "#374151"
-                      : "rgb(107,114,128)",
-                  fontWeight: params.sort === "visited" ? "bold" : "normal",
-                }}
-                onClick={() =>
-                  setParams((p) => ({ ...p, sort: "visited", page: 1 }))
-                }
-              >
-                پربازدید ترین
-                {params.sort === "visited" && (
-                  <span className="bg-orange-600 w-2 h-2 absolute rounded-full -top-1" />
-                )}
-              </button>
-
-              <button
-                className="relative"
-                style={{
-                  color:
-                    params.sort === "price_asc"
-                      ? theme === "dark"
-                        ? "white"
-                        : "#374151"
-                      : "rgb(107,114,128)",
-                  fontWeight: params.sort === "price_asc" ? "bold" : "normal",
-                }}
-                onClick={() =>
-                  setParams((p) => ({ ...p, sort: "price_asc", page: 1 }))
-                }
-              >
-                ارزان ترین
-                {params.sort === "price_asc" && (
-                  <span className="bg-orange-600 w-2 h-2 absolute rounded-full -top-1" />
-                )}
-              </button>
-
-              <button
-                className="relative"
-                style={{
-                  color:
-                    params.sort === "price_desc"
-                      ? theme === "dark"
-                        ? "white"
-                        : "#374151"
-                      : "rgb(107,114,128)",
-                  fontWeight: params.sort === "price_desc" ? "bold" : "normal",
-                }}
-                onClick={() =>
-                  setParams((p) => ({ ...p, sort: "price_desc", page: 1 }))
-                }
-              >
-                گران ترین
-                {params.sort === "price_desc" && (
-                  <span className="bg-orange-600 w-2 h-2 absolute rounded-full -top-1" />
-                )}
-              </button>
-
-              <button
-                className="relative"
-                style={{
-                  color:
-                    params.sort === "rating"
-                      ? theme === "dark"
-                        ? "white"
-                        : "#374151"
-                      : "rgb(107,114,128)",
-                  fontWeight: params.sort === "rating" ? "bold" : "normal",
-                }}
-                onClick={() =>
-                  setParams((p) => ({ ...p, sort: "rating", page: 1 }))
-                }
-              >
-                محبوب ترین
-                {params.sort === "rating" && (
-                  <span className="bg-orange-600 w-2 h-2 absolute rounded-full -top-1" />
-                )}
-              </button>
+            <div className="flex gap-6 mr-2">
+              {SORT_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  className={`relative ${getSortClass(opt.value)}`}
+                  onClick={() =>
+                    setParams((prev) => ({ ...prev, sort: opt.value, page: 1 }))
+                  }
+                >
+                  {opt.label}
+                  {params.sort === opt.value && (
+                    <span className="bg-orange-600 w-2 h-2 absolute rounded-full -top-1" />
+                  )}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -178,41 +140,40 @@ const Home: NextPage = () => {
             {loading ? (
               <ProductLoad />
             ) : products.length > 0 ? (
-              products.map((item: ProductType) => (
+              products.map((item) => (
                 <ProductItem product={item} key={item.id} />
               ))
             ) : (
-              <div className="text-center w-full">محصولی یافت نشد</div>
+              <div className="text-center w-full py-10">محصولی یافت نشد</div>
             )}
           </div>
 
           <div className="flex gap-2 justify-center mt-4">
             <button
+              className="px-4 py-2 bg-gray-200 dark:bg-slate-700 rounded hover:bg-gray-300 disabled:opacity-50"
+              disabled={params.page === 1}
               onClick={() =>
-                setParams((p) => ({
-                  ...p,
-                  page: Math.max(1, p.page - 1),
+                setParams((prev) => ({
+                  ...prev,
+                  page: Math.max(1, prev.page - 1),
                 }))
               }
             >
               قبلی
             </button>
-
-            <span>صفحه {params.page}</span>
-
+            <span className="px-4 py-2">صفحه {params.page}</span>
             <button
+              className="px-4 py-2 bg-gray-200 dark:bg-slate-700 rounded hover:bg-gray-300 disabled:opacity-50"
+              disabled={!hasMore}
               onClick={() =>
-                setParams((p) => ({
-                  ...p,
-                  page: p.page + 1,
-                }))
+                setParams((prev) => ({ ...prev, page: prev.page + 1 }))
               }
             >
               بعدی
             </button>
           </div>
         </div>
-      </div>{" "}
+      </div>
     </div>
   );
 };

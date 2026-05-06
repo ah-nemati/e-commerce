@@ -1,17 +1,15 @@
-import React, { useEffect, useState } from "react";
+"use client";
+
 import { useDispatch, useSelector } from "react-redux";
-import { SetTheme } from "../Store/Actions";
-import { State } from "../types";
+import { State } from "./../../types";
+import { useTheme } from "./hooks/useTheme";
+import { SetTheme } from "@/Store/Actions";
+import { useState } from "react";
 
 export const ThemeToggle = () => {
-  const { theme } = useSelector((state: State) => state);
-  const dispatch = useDispatch();
+  const theme = useSelector((state: State) => state.theme);
   const [showList, setShowList] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const dispatch = useDispatch();
 
   const icons = {
     light: (
@@ -63,32 +61,7 @@ export const ThemeToggle = () => {
     ),
   };
 
-  useEffect(() => {
-    const root = window.document.documentElement;
-
-    const applyTheme = (currentTheme: string) => {
-      if (currentTheme === "system") {
-        const isDark = window.matchMedia(
-          "(prefers-color-scheme: dark)",
-        ).matches;
-        root.classList.toggle("dark", isDark);
-      } else {
-        root.classList.toggle("dark", currentTheme === "dark");
-      }
-      localStorage.setItem("theme", currentTheme);
-    };
-
-    applyTheme(theme);
-
-    if (theme === "system") {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      const handleChange = () => applyTheme("system");
-      mediaQuery.addEventListener("change", handleChange);
-      return () => mediaQuery.removeEventListener("change", handleChange);
-    }
-  }, [theme]);
-
-  if (!mounted) return null;
+  useTheme(theme);
 
   return (
     <div className="relative">
