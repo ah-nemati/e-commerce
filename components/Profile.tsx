@@ -3,7 +3,6 @@ import { useUser } from "@/hooks/useUser";
 
 const Profile = () => {
   const { user } = useUser();
-  console.log(user);
   const isLoggedIn = !!user?.email;
 
   const icon = (

@@ -16,7 +16,7 @@ export function useUser() {
     const fetchUser = async () => {
       try {
         const res = await fetch("/api/me", {
-          credentials: "include", // مهم برای cookie
+          credentials: "include",
         });
 
         if (!res.ok) {

@@ -1,380 +1,322 @@
 import { useRouter } from "next/router";
 import ProfileNav from "../../../../components/Tools/ProfileNav";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { Notify } from "../../../../Store/Actions";
 import React from "react";
 import { Color, ProductType } from "@/types";
 
+const BRANDS = [
+  "سامسونگ",
+  "ایسوس",
+  "اپل",
+  "شیائومی",
+  "لنوو",
+  "میشن",
+  "مافی",
+  "لیتو",
+  "تیولف",
+  "متفرقه",
+];
+const CATEGORIES = [
+  "قطعات کامپیوتر",
+  "گوشی موبایل",
+  "لپ تاپ و الترابوک",
+  "هدفون و هندزفری",
+];
+
+type FormState = {
+  title: string;
+  link: string;
+  price: string;
+  brand: string;
+  category: string;
+};
+
+type FormErrors = Partial<Record<keyof FormState | "colors", string>>;
+
+const inputClass =
+  "w-full border border-gray-200 dark:border-slate-600 bg-transparent p-3 rounded-lg outline-none focus:border-orange-400 dark:focus:border-orange-400 text-gray-800 dark:text-white transition-colors text-sm placeholder:text-gray-400 dark:placeholder:text-slate-500";
+
+const labelClass =
+  "text-sm font-medium text-gray-600 dark:text-slate-300 mb-1 block";
+
+const FieldError = ({ msg }: { msg?: string }) =>
+  msg ? <p className="text-red-500 text-xs mt-1">{msg}</p> : null;
+
 const Edit: React.FC = () => {
   const dispatch = useDispatch();
-  const { push } = useRouter();
-  const [product, setProduct] = useState<Partial<ProductType>>({});
-
-  const colorhxcodeRef = useRef<HTMLInputElement>(null);
-  const colortitleRef = useRef<HTMLInputElement>(null);
-  const titleRef = useRef<HTMLInputElement>(null);
-  const brandRef = useRef<HTMLSelectElement>(null);
-  const categoryRef = useRef<HTMLSelectElement>(null);
-  const priceRef = useRef<HTMLInputElement>(null);
-  const linkImageREf = useRef<HTMLInputElement>(null);
-
-  const [color, setColor] = useState<Partial<Color>>({});
-
-  const [focusColorCode, setFocusColorCode] = useState(false);
-  const [focusColorTitle, setfocusColorTitle] = useState(false);
-  const [colorMessage, setColorMessage] = useState("");
-  const [focusPrice, setFocusPrice] = useState(false);
-  const [errorPriceInput, setErrorPriceInput] = useState("");
-  const [errorLinkImage, setErrorLinkImage] = useState("");
-  const [focusImageLink, setFocusImageLink] = useState(false);
-  const [errorTitle, seterrorTitle] = useState("");
-  const [focusTitle, setFocusTitle] = useState(false);
-
-  const [isColor, setIsColor] = useState(false);
-  const [isLink, setIsLink] = useState(false);
-  const [isTitle, setIsTitle] = useState(false);
-  const [isPrice, setIsPrice] = useState(false);
-
-  const brand = brandRef?.current?.value;
-  const category = categoryRef?.current?.value;
-  const price = priceRef?.current?.value;
-  const linkImage = linkImageREf?.current?.value;
-  const title = titleRef?.current?.value;
-
   const router = useRouter();
-  const { id } = router?.query;
-  useEffect(() => {
-    titleRef?.current?.focus();
-  }, []);
+  const { id } = router.query;
+
+  const [form, setForm] = useState<FormState>({
+    title: "",
+    link: "",
+    price: "",
+    brand: BRANDS[0],
+    category: CATEGORIES[0],
+  });
+  const [colors, setColors] = useState<Color[]>([]);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [colorHex, setColorHex] = useState("#000000");
+  const [colorTitle, setColorTitle] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (id) {
-      axios
-        .post<{ product: ProductType[] }>("/api/productDetail", { id })
-        .then((res) => setProduct(res.data.product[0]));
-    }
+    if (!id) return;
+    axios
+      .post<{ product: ProductType[] }>("/api/productDetail", { id })
+      .then((res) => {
+        const p = res.data.product[0];
+        if (!p) return;
+        setForm({
+          title: p.title_fa ?? "",
+          link: p.image?.url[0] ?? "",
+          price: String(p.price ?? ""),
+          brand: p.data_layer?.brand ?? BRANDS[0],
+          category: p.data_layer?.category ?? CATEGORIES[0],
+        });
+        setColors(p.colors ?? []);
+      })
+      .finally(() => setLoading(false));
   }, [id]);
 
-  const urlRegx = new RegExp(
-    "(https://www.|http://www.|https://|http://)?[a-zA-Z0-9]{2,}(.[a-zA-Z0-9]{2,})(.[a-zA-Z0-9]{2,})?/[a-zA-Z0-9]{2,}"
-  );
+  const handleChange = (key: keyof FormState, value: string) =>
+    setForm((prev) => ({ ...prev, [key]: value }));
 
-  useEffect(() => {
-    setIsColor(product?.colors && product?.colors.length > 0 ? true : false);
-  }, [color, product?.colors]);
+  const validate = async (): Promise<boolean> => {
+    const newErrors: FormErrors = {};
 
-  const saveColor = (e: React.FormEvent<HTMLFormElement>) => {
+    if (form.title.length < 10)
+      newErrors.title = "نام محصول باید حداقل ۱۰ کاراکتر باشد";
+    if (!form.price || Number(form.price) <= 0)
+      newErrors.price = "قیمت معتبر وارد کنید";
+
+    if (!form.link) {
+      newErrors.link = "لینک تصویر الزامی است";
+    } else {
+      try {
+        await axios.get(form.link);
+      } catch {
+        newErrors.link = "لینک تصویر معتبر نیست";
+      }
+    }
+
+    if (!colors.length) newErrors.colors = "حداقل یک رنگ وجود داشته باشد";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const addColor = (e: React.FormEvent) => {
     e.preventDefault();
-    const hex_code = colorhxcodeRef.current?.value;
-    const title = colortitleRef.current?.value;
-    if (title && hex_code) {
-      if (product?.colors && product.colors.length > 0) {
-        let found = false;
-        for (let index = 0; index < product.colors.length; index++) {
-          if (
-            product.colors[index].hex_code == hex_code ||
-            product.colors[index].title == title
-          ) {
-            found = true;
-          }
-        }
-        if (!found) {
-          setColor({
-            id: !product.colors?.length ? '1' : product.colors.length + '1',
-            hex_code,
-            title,
-          });
-          setColorMessage("");
-        } else {
-          setColorMessage("رنگ قبلا اضافه شده است");
-        }
-      } else {
-        setColor({
-          id: product.colors && !product.colors.length ? '1' : product?.colors?.length + '1',
-          hex_code,
-          title,
-        });
-        setColorMessage("");
-      }
-    } else {
-      setColorMessage("فیلد ها را کامل کنید");
-    }
-  };
-  useEffect(() => {
-    if (product.colors) {
-      setProduct({
-        ...product,
-        colors: [...product.colors, color as Color],
-      });
-    }
-  }, [color, product]);
 
-  const update = () => {
-    setIsColor(product?.colors && product?.colors.length > 0 ? true : false);
-    const priceRegx = new RegExp("^[0-9]");
-
-    if (price && !priceRegx.test(price) && parseInt(price) > 0) {
-      setErrorPriceInput("از فرمت عددی استفاده کنید");
-    } else {
-      setErrorPriceInput("");
-      setIsPrice(price && parseInt(price) > 0 ? true : false);
-    }
-    if (linkImage && linkImage.length > 0) {
-      if (urlRegx.test(linkImage)) {
-        if (
-          linkImage.includes(
-            "https://dkstatics-public.digikala.com/digikala-products/"
-          )
-        ) {
-          axios
-            .get(linkImage)
-            .then(() => {
-              setIsLink(true);
-              setErrorLinkImage("");
-            })
-            .catch(() => setErrorLinkImage("لینک عکس اشتباه است"));
-        }
-      } else {
-        setErrorLinkImage("فرمت صحیح لینک را وارد کنید");
-        setIsLink(false);
-      }
-    }
-    if (title && title.length >= 10) {
-      setIsTitle(true);
-      seterrorTitle("");
-    } else {
-      seterrorTitle("نام محصول باید حداقل 10 کاراکتر باشد");
-      setIsTitle(false);
+    if (!colorTitle.trim()) {
+      setErrors((p) => ({ ...p, colors: "نام رنگ را وارد کنید" }));
+      return;
     }
 
-    setProduct({
-      ...product,
-      title_fa: title,
-      image: {url:[linkImage ?? ""]},
-      price: price ? parseInt(price) : 0,
-      data_layer:{category:category??"",brand:brand??""}, 
-    });
-    setColorMessage("");
-    setErrorPriceInput("");
-    setErrorLinkImage("");
+    if (colors.some((c) => c.hex_code === colorHex || c.title === colorTitle)) {
+      setErrors((p) => ({ ...p, colors: "رنگ تکراری است" }));
+      return;
+    }
+
+    setColors((prev) => [
+      ...prev,
+      { id: Date.now().toString(), hex_code: colorHex, title: colorTitle },
+    ]);
+    setColorTitle("");
+    setErrors((p) => ({ ...p, colors: undefined }));
   };
 
-  useEffect(() => {
-    if (isColor && isLink && isPrice && isTitle) {
-      axios.post("/api/editProduct/", { product }).then(() => {
-        dispatch(Notify("success", "تغییرات روی محصول اعمال شد"));
-        push("/");
-      });
-    }
-  }, [product, isColor, isLink, isPrice, isTitle, dispatch, push]);
+  const removeColor = (colorId: string) =>
+    setColors((prev) => prev.filter((c) => c.id !== colorId));
 
-  const deleteColor = (idColor: string) => {
-    if (product.colors) {
-      setProduct({
-        ...product,
-        colors: product.colors.filter((item: Color) => item.id !== idColor),
-      });
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    const isValid = await validate();
+
+    if (!isValid) {
+      setSubmitting(false);
+      return;
+    }
+
+    try {
+      const product: Partial<ProductType> = {
+        id: id as string,
+        title_fa: form.title,
+        image: { url: [form.link] },
+        price: Number(form.price),
+        data_layer: { brand: form.brand, category: form.category },
+        colors,
+      };
+      await axios.post("/api/editProduct/", { product });
+      dispatch(Notify("success", "تغییرات روی محصول اعمال شد"));
+      router.push("/");
+    } catch {
+      dispatch(Notify("error", "خطا در ذخیره تغییرات"));
+      setSubmitting(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex sm:flex-row flex-col md:mx-52 m-0 my-10 sm:justify-around sm:p-0 p-3 sm:gap-0 gap-4">
+        <ProfileNav />
+        <div className="flex items-center justify-center sm:w-8/12 h-64 rounded-xl bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700">
+          <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="sm:flex-row flex-col md:mx-52 m-0 my-10 sm:justify-around sm:p-0 p-3 sm:gap-0 gap-2">
+    <div className="flex sm:flex-row flex-col md:mx-52 m-0 my-10 sm:justify-around sm:p-0 p-3 sm:gap-0 gap-4">
       <ProfileNav />
-      <div className="flex-col dark:text-white text-gray-600 rounded bg-white dark:bg-slate-600 sm:w-8/12 gap-8 p-8">
-        {/* title */}
-        <div className="flex flex-col gap-2">
-          <input
-            type="text"
-            className="border rounded p-2 w-10/12"
-            placeholder="نام محصول را وارد کنید"
-            required
-            onFocus={() => setFocusTitle(true)}
-            onBlur={() => setFocusTitle(false)}
-            defaultValue={product?.title_fa || ""}
-            ref={titleRef}
-          />
-          <span
-            className={`${
-              errorTitle && !focusTitle ? "visible" : "hidden"
-            } text-red-500`}
-          >
-            {errorTitle}
-          </span>
+
+      <div className="flex flex-col rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-gray-100 dark:border-slate-700 sm:w-8/12">
+        <div className="p-6 border-b border-gray-100 dark:border-slate-700">
+          <h2 className="text-lg font-bold text-gray-800 dark:text-white">
+            ویرایش محصول
+          </h2>
         </div>
-        {/* link image */}
-        <div className="flex flex-col gap-2">
-          <input
-            type="url"
-            className="border rounded p-2 w-10/12"
-            placeholder="لینک عکس را با این فرمت وارد کنید :  .../https://dkstatics-public.digikala.com/digikala-products "
-            required
-            defaultValue={product?.image?.url[0] || ""}
-            onFocus={() => setFocusImageLink(true)}
-            onBlur={() => setFocusImageLink(false)}
-            ref={linkImageREf}
-          />
-          <span
-            className={`${
-              errorLinkImage && !focusImageLink ? "visible" : "hidden"
-            } text-red-500`}
-          >
-            {errorLinkImage}
-          </span>
-        </div>
-        {/* brand and category */}
-        <div className="flex flex-row gap-6">
-          <div className="flex flex-col w-1/2">
-            <label htmlFor="brand">برند</label>
-            <select
-              name=""
-              id="brand"
-              className="rounded p-2 dark:bg-slate-900"
-              required
-              value={product?.data_layer?.brand}
-              ref={brandRef}
-            >
-              <option value="سامسونگ">سامسونگ</option>
-              <option value="ایسوس">ایسوس</option>
-              <option value="اپل">اپل</option>
-              <option value="شیائومی">شیائومی</option>
-              <option value="لنوو">لنوو</option>
-              <option value="میشن">میشن</option>
-              <option value="مافی">مافی</option>
-              <option value="لیتو">لیتو</option>
-              <option value="تیولف">تیولف</option>
-              <option value="متفرقه">متفرقه</option>
-            </select>
+
+        <div className="p-6 flex flex-col gap-5">
+          <div>
+            <label className={labelClass}>نام محصول</label>
+            <input
+              type="text"
+              value={form.title}
+              onChange={(e) => handleChange("title", e.target.value)}
+              className={inputClass}
+              placeholder="نام محصول را وارد کنید"
+              autoFocus
+            />
+            <FieldError msg={errors.title} />
           </div>
-          <div className="flex flex-col w-1/2">
-            <label htmlFor="category">دسته بندی</label>
-            <select
-              name=""
-              id="category"
-              className="rounded p-2 dark:bg-slate-900"
-              required
-              value={product?.data_layer?.category}
-              ref={categoryRef}
-            >
-              <option value="قطعات کامپیوتر">قطعات کامپیوتر</option>
-              <option value="گوشی موبایل">گوشی موبایل</option>
-              <option value="لپ تاپ و الترابوک">لپ تاپ و الترابوک</option>
-              <option value="هدفون و هندزفری">هدفون و هندزفری</option>
-            </select>
+
+          <div>
+            <label className={labelClass}>لینک تصویر</label>
+            <input
+              type="url"
+              value={form.link}
+              onChange={(e) => handleChange("link", e.target.value)}
+              className={inputClass}
+              placeholder="https://..."
+            />
+            <FieldError msg={errors.link} />
           </div>
-        </div>
-        {/* price input */}
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-2">
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>برند</label>
+              <select
+                value={form.brand}
+                onChange={(e) => handleChange("brand", e.target.value)}
+                className={inputClass}
+              >
+                {BRANDS.map((b) => (
+                  <option key={b}>{b}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={labelClass}>دسته‌بندی</label>
+              <select
+                value={form.category}
+                onChange={(e) => handleChange("category", e.target.value)}
+                className={inputClass}
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>قیمت (تومان)</label>
             <input
               type="number"
-              className="p-2 w-1/2 border rounded"
-              placeholder="قیمت کالا را به ریال وارد کنید"
-              required
-              defaultValue={product?.price || ""}
-              onFocus={() => setFocusPrice(true)}
-              onBlur={() => setFocusPrice(false)}
-              ref={priceRef}
+              value={form.price}
+              onChange={(e) => handleChange("price", e.target.value)}
+              className={`${inputClass} w-1/2`}
+              placeholder="۰"
             />
-            <span
-              className={`${
-                errorPriceInput && !focusPrice ? "visible" : "hidden"
-              } text-red-500`}
-            >
-              {errorPriceInput}
-            </span>
+            <FieldError msg={errors.price} />
           </div>
-          {/* color input */}
-          <form className="flex flex-col w-full gap-4" onSubmit={saveColor}>
-            <div className="flex flex-row w-7/12 items-center border rounded p-1 dark:bg-slate-900">
+
+          <div>
+            <label className={labelClass}>مدیریت رنگ‌ها</label>
+            <form onSubmit={addColor} className="flex items-center gap-2">
               <input
                 type="color"
-                name="hex_code"
-                className="w-1/12 ml-5"
-                onFocus={() => setFocusColorCode(true)}
-                onBlur={() => setFocusColorCode(false)}
-                ref={colorhxcodeRef}
-                required
+                value={colorHex}
+                onChange={(e) => setColorHex(e.target.value)}
+                className="w-10 h-10 rounded cursor-pointer border border-gray-200 dark:border-slate-600 p-0.5 shrink-0"
               />
               <input
                 type="text"
-                name="title"
-                className="outline-none w-8/12 dark:bg-slate-900"
-                onFocus={() => setfocusColorTitle(true)}
-                onBlur={() => setfocusColorTitle(false)}
-                ref={colortitleRef}
+                value={colorTitle}
+                onChange={(e) => setColorTitle(e.target.value)}
                 placeholder="نام رنگ"
+                className={`${inputClass} flex-1`}
               />
               <button
                 type="submit"
-                className="py-2 w-3/12 bg-green-500 rounded text-white"
+                className="px-4 h-10 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors shrink-0"
               >
-                ذخیره رنگ
+                افزودن
               </button>
-            </div>
-            <span
-              className={`${
-                colorMessage && !focusColorCode && !focusColorTitle
-                  ? "visible"
-                  : "hidden"
-              } text-red-500`}
-            >
-              {colorMessage}
-            </span>
-          </form>
-        </div>
-        {/* show colors */}
-        <div className="flex flex-row items-center gap-4">
-          <label htmlFor="colors">رنگ های موجود : </label>
-          <div id="colors" className="flex flex-row gap-2 text-gray-400">
-            {product?.colors && product.colors.length > 0
-              ? product.colors.map((el: Color) => (
+            </form>
+            <FieldError msg={errors.colors} />
+
+            <div className="flex flex-wrap gap-2 mt-3">
+              {colors.length > 0 ? (
+                colors.map((c) => (
                   <div
-                    className="flex flex-col border p-1 rounded min-w-[100px] gap-2"
-                    key={el.id}
+                    key={c.id}
+                    className="flex items-center gap-2 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm text-gray-700 dark:text-slate-300"
                   >
-                    <div className="flex flex-row justify-end">
-                      <button onClick={() => deleteColor(el.id)}>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="w-5 h-5 text-red-600"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
-                    </div>
                     <span
-                      className="w-1/2 h-6 block rounded border"
-                      style={{ backgroundColor: el.hex_code }}
-                    ></span>
-                    <span>{el.title}</span>
+                      className="w-4 h-4 rounded-full border border-gray-200 dark:border-slate-500 shrink-0"
+                      style={{ background: c.hex_code }}
+                    />
+                    <span>{c.title}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeColor(c.id)}
+                      className="text-gray-400 hover:text-red-500 transition-colors ml-1 text-base leading-none"
+                    >
+                      ×
+                    </button>
                   </div>
                 ))
-              : "لیست خالی می باشد."}
+              ) : (
+                <p className="text-sm text-gray-400 dark:text-slate-500">
+                  رنگی اضافه نشده است.
+                </p>
+              )}
+            </div>
           </div>
-        </div>
-        <div className="flex flex-row justify-center gap-4 text-white">
-          <button
-            className="py-2 px-8 rounded-md bg-green-400"
-            onClick={update}
-          >
-            ذخیره تغییرات
-          </button>
-          <button
-            className="py-2 px-8 rounded-md bg-red-400"
-            onClick={() => push("/profile/create")}
-          >
-            انصراف
-          </button>
+
+          <div className="flex gap-3 pt-2 border-t border-gray-100 dark:border-slate-700">
+            <button
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="flex-1 sm:flex-none bg-orange-500 hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed text-white px-8 py-2.5 rounded-lg text-sm font-medium transition-colors"
+            >
+              {submitting ? "در حال ذخیره..." : "ذخیره تغییرات"}
+            </button>
+            <button
+              onClick={() => router.push("/profile/admin")}
+              className="flex-1 sm:flex-none border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 px-8 py-2.5 rounded-lg text-sm font-medium transition-colors"
+            >
+              انصراف
+            </button>
+          </div>
         </div>
       </div>
     </div>
