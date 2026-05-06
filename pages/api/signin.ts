@@ -1,38 +1,63 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import users from "../../utils/models/user";
-import ConnectDB from "../../utils/mongodb";
 import bcrypt from "bcrypt";
+import { readDB } from "@/utils/db";
+import { signToken } from "@/utils/auth";
+import { setCookie } from "@/utils/cookie";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   if (req.method !== "POST") {
-    return res.status(405).json({ success: false, message: "Method not allowed" });
+    return res
+      .status(405)
+      .json({ success: false, message: "Method not allowed" });
   }
 
   try {
-    await ConnectDB();
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ success: false, message: "Email and password are required" });
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
     }
 
-    const findUser = await users.findOne({ email });
+    const users = await readDB("users.json");
 
-    if (!findUser) {
-      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    const user = users.find((u: any) => u.email === email);
+
+    if (!user) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
     }
 
-    const isPasswordCorrect = await bcrypt.compare(password, findUser.password||"");
+    const isValid = await bcrypt.compare(password, user.password);
 
-    if (!isPasswordCorrect) {
-      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    if (!isValid) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
     }
 
-    const { password: _, ...userWithoutPassword } = findUser.toObject();
+    // 👇 فقط اطلاعات مهم داخل token
+    const token = signToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
 
-    return res.status(200).json({ success: true, user: userWithoutPassword });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ success: false, message: "Internal Server Error" });
+    res.setHeader("Set-Cookie", setCookie(token));
+
+    const { password: _, ...safeUser } = user;
+
+    return res.status(200).json({
+      success: true,
+      user: safeUser,
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 }

@@ -1,37 +1,59 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import Product from "../../utils/models/products"; 
-import connectDB from "../../utils/mongodb";
+import { readDB, writeDB } from "../../utils/db";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   if (req.method !== "POST") {
-    return res.status(405).json({ success: false, message: "Method not allowed" });
+    return res.status(405).json({
+      success: false,
+      message: "Method not allowed",
+    });
   }
 
   try {
-    await connectDB();
-
     const { color, link, title, brand, category, price } = req.body;
 
-    if (!title || !price) {
-      return res.status(400).json({ success: false, message: "عنوان و قیمت الزامی است" });
+    // validation
+    if (!title || !price || !brand || !category) {
+      return res.status(400).json({
+        success: false,
+        message: "title, price, brand, category are required",
+      });
     }
 
-     const newProduct = new Product({
+    const products = await readDB("products.json");
+
+    const newProduct = {
+      id: crypto.randomUUID(), // بهتر از Date.now
       title_fa: title,
-      images: { url: link },
-      data_layer: {
-        brand: brand,
-        category: category,
+      images: {
+        url: link || "",
       },
-      price: price,
-      colors: color,
+      data_layer: {
+        brand,
+        category,
+      },
+      price,
+      colors: color || [],
+    };
+
+    const updatedProducts = [...products, newProduct];
+
+    await writeDB("products.json", updatedProducts);
+
+    return res.status(201).json({
+      success: true,
+      message: "Product created successfully",
+      product: newProduct,
     });
-
-    await newProduct.save();
-
-    return res.status(201).json({ success: true, data: newProduct });
   } catch (error: any) {
-    console.error("خطا در ساخت محصول:", error);
-    return res.status(500).json({ success: false, message: error.message || "خطای سرور" });
+    console.error("Create product error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Server error",
+    });
   }
 }

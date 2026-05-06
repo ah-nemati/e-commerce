@@ -1,96 +1,140 @@
-import React, { useEffect, useState, FC, ChangeEvent } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { SetFilter } from "../../Store/Actions";
-import { ProductType, State } from "../../types";
+import React, {
+  useEffect,
+  useState,
+  FC,
+  ChangeEvent,
+  useCallback,
+} from "react";
 
-export const PriceRange: FC = () => {
-  const [minvalue, setMinValue] = useState<number>(0);
-  const [maxvalue, setMaxValue] = useState<number>(100000000);
-  const minGap = 0;
-  const dispatch = useDispatch();
-  const products = useSelector((state: State) => state.products);
+type Props = {
+  onChange?: (min: number, max: number) => void;
+};
 
-  const handleMinChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setMinValue(Number(e.target.value));
+export const PriceRange: FC<Props> = ({ onChange }) => {
+  const MAX_PRICE = 100000000;
+  const MIN_GAP = 500000; // حداقل فاصله ۵۰۰ هزار تومان
+
+  const [minValue, setMinValue] = useState<number>(0);
+  const [maxValue, setMaxValue] = useState<number>(MAX_PRICE);
+
+  const formatPrice = (num: number): string => {
+    return num.toLocaleString("fa-IR");
   };
 
-  const handleMaxChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setMaxValue(Number(e.target.value));
+  const parsePrice = (str: string): number => {
+    return Number(str.replace(/[^0-9]/g, "")) || 0;
   };
 
+  const handleMinInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    let value = parsePrice(e.target.value);
+    if (value > maxValue - MIN_GAP) value = maxValue - MIN_GAP;
+    if (value < 0) value = 0;
+    setMinValue(value);
+  };
+
+  const handleMaxInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    let value = parsePrice(e.target.value);
+    if (value < minValue + MIN_GAP) value = minValue + MIN_GAP;
+    if (value > MAX_PRICE) value = MAX_PRICE;
+    setMaxValue(value);
+  };
+
+  // هندلر اسلایدر
+  const handleMinSliderChange = (e: ChangeEvent<HTMLInputElement>) => {
+    let value = Number(e.target.value);
+    if (value > maxValue - MIN_GAP) value = maxValue - MIN_GAP;
+    setMinValue(value);
+  };
+
+  const handleMaxSliderChange = (e: ChangeEvent<HTMLInputElement>) => {
+    let value = Number(e.target.value);
+    if (value < minValue + MIN_GAP) value = minValue + MIN_GAP;
+    setMaxValue(value);
+  };
+
+  // به‌روزرسانی بک‌گراند اسلایدر
   useEffect(() => {
-    if (maxvalue - minvalue < minGap) {
-      setMinValue(maxvalue - minGap);
-      setMaxValue(minvalue + minGap);
-    }
-console.log(products);
+    const sliderTrack = document.getElementById(
+      "slider-track",
+    ) as HTMLDivElement | null;
+    if (!sliderTrack) return;
 
-    // if (products) {
-    //   dispatch(
-    //     SetFilter(
-    //       products?.filter(
-    //         (item: ProductType) =>
-    //           item.price / 10 <= maxvalue && item.price / 10 >= minvalue
-    //       )
-    //     )
-    //   );
-    // }
+    const percent1 = (minValue / MAX_PRICE) * 100;
+    const percent2 = (maxValue / MAX_PRICE) * 100;
 
-    const sliderTrack = document.getElementById("slider-track");
-    if (sliderTrack) {
-      const per1 = (minvalue / 100000000) * 100;
-      const per2 = (maxvalue / 100000000) * 100;
-      sliderTrack.style.background = `linear-gradient(to left, #e0e5e6 ${per1}%,#19bfd3 ${per1}%,#19bfd3 ${per2}%,#e0e5e6 ${per2}%)`;
-    }
-  }, [minvalue, maxvalue, products, dispatch, minGap]);
+    sliderTrack.style.background = `linear-gradient(to left, 
+      #4b5563 ${percent1}%, 
+      #22d3ee ${percent1}%, 
+      #22d3ee ${percent2}%, 
+      #4b5563 ${percent2}%)`;
+  }, [minValue, maxValue]);
+
+  // Debounce onChange
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      onChange?.(minValue, maxValue);
+    }, 350);
+    return () => clearTimeout(timeout);
+  }, [minValue, maxValue, onChange]);
 
   return (
     <>
-      <div className="flex items-center justify-between">
-        <span className="text-base">از</span>
-        <input
-          type="text"
-          className="flex text-left text-sm outline-none shadow-none p-2 border-b dark:border-none dark:w-10/12 font-bold text-gray-800 rounded dark:bg-slate-800 dark:text-white w-11/12"
-          onChange={handleMinChange}
-          value={minvalue}
-        />
-        <span className="text-base mr-1">تومان</span>
+      <div className="space-y-5">
+        {/* از */}
+        <div className="flex items-center justify-between">
+          <span className="text-base text-gray-400 dark:text-gray-500">از</span>
+          <input
+            type="text"
+            className="flex-1 mx-3 text-left text-sm font-bold p-2 border-b border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none dark:text-white"
+            value={formatPrice(minValue)}
+            onChange={handleMinInputChange}
+          />
+          <span className="text-base text-gray-400 dark:text-gray-500 whitespace-nowrap">
+            تومان
+          </span>
+        </div>
+
+        {/* تا */}
+        <div className="flex items-center justify-between">
+          <span className="text-base text-gray-400 dark:text-gray-500">تا</span>
+          <input
+            type="text"
+            className="flex-1 mx-3 text-left text-sm font-bold p-2 border-b border-gray-300 dark:border-gray-600 bg-transparent focus:outline-none dark:text-white"
+            value={formatPrice(maxValue)}
+            onChange={handleMaxInputChange}
+          />
+          <span className="text-base text-gray-400 dark:text-gray-500 whitespace-nowrap">
+            تومان
+          </span>
+        </div>
       </div>
-      <div className="flex items-center justify-between">
-        <span className="text-base">تا</span>
-        <input
-          type="text"
-          className="flex text-left outline-none shadow-none p-2 border-b dark:border-none dark:w-10/12 font-bold text-sm text-gray-800 rounded dark:bg-slate-800 dark:text-white w-11/12"
-          onChange={handleMaxChange}
-          value={maxvalue}
-        />
-        <span className="text-base mr-1">تومان</span>
-      </div>
-      <div className="range mb-8">
-        <div className="slider-track" id="slider-track"></div>
-        <div className="wrapper">
-          <div className="relative">
-            <input
-              type="range"
-              min="0"
-              max="100000000"
-              value={minvalue}
-              id="min-range"
-              onChange={handleMinChange}
-            />
-            <input
-              type="range"
-              min="0"
-              max="100000000"
-              value={maxvalue}
-              id="max-range"
-              onChange={handleMaxChange}
-            />
-          </div>
-          <div className="flex justify-between w-full text-xs text-gray-500 mt-3 pb-5">
-            <span>ارزانترین</span>
-            <span>گرانترین</span>
-          </div>
+
+      {/* اسلایدر */}
+      <div className="range mt-8 mb-8 relative">
+        <div id="slider-track" className="h-2 w-full rounded-full relative" />
+
+        <div className="relative mt-1">
+          <input
+            type="range"
+            min="0"
+            max={MAX_PRICE}
+            value={minValue}
+            onChange={handleMinSliderChange}
+            className="absolute w-full accent-cyan-400 pointer-events-auto z-20"
+          />
+          <input
+            type="range"
+            min="0"
+            max={MAX_PRICE}
+            value={maxValue}
+            onChange={handleMaxSliderChange}
+            className="absolute w-full accent-cyan-400 pointer-events-auto z-20"
+          />
+        </div>
+
+        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-6">
+          <span>ارزان‌ترین</span>
+          <span>گران‌ترین</span>
         </div>
       </div>
     </>

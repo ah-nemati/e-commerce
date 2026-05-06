@@ -6,7 +6,7 @@ import { NextPage } from "next";
 import { State } from "@/types";
 
 const Profile: NextPage = () => {
-  const { user } = useSelector((state: State) => state);
+  const user = useSelector((state: State) => state.user);
   const { push } = useRouter();
   useEffect(() => {
     if (!user?.email) {

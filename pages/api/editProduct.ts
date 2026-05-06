@@ -1,41 +1,64 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import products from "../../utils/models/products";
-import ConnectDB from "../../utils/mongodb";
+import { readDB, writeDB } from "../../utils/db";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   if (req.method !== "PUT" && req.method !== "POST") {
-    return res.status(405).json({ success: false, message: "Method not allowed" });
+    return res.status(405).json({
+      success: false,
+      message: "Method not allowed",
+    });
   }
 
   try {
-    await ConnectDB();
-    const data = req.body.product || req.body;
-    const { id, colors, images, title_fa, data_layer, price } = data;
+    const body = req.body?.product || req.body;
+    const { id, colors, images, title_fa, data_layer, price } = body;
 
+    // validation
     if (!id) {
-      return res.status(400).json({ success: false, message: "ID is required" });
+      return res.status(400).json({
+        success: false,
+        message: "ID is required",
+      });
     }
 
-    const updatedProduct = await products.findOneAndUpdate(
-      { id },
-      {
-        title_fa,
-        images,
-        data_layer,
-        price,
-        colors,
-      },
-      {
-        new: true,
-      }
-    );
+    const products = await readDB("products.json");
 
-    if (!updatedProduct) {
-      return res.status(404).json({ success: false, message: "Product not found" });
+    const index = products.findIndex((p: any) => String(p.id) === String(id));
+
+    if (index === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
     }
 
-    return res.status(200).json({ success: true, message: "updated !" });
+    const updatedProduct = {
+      ...products[index],
+      title_fa,
+      images,
+      data_layer,
+      price,
+      colors,
+    };
+
+    const updatedProducts = [...products];
+    updatedProducts[index] = updatedProduct;
+
+    await writeDB("products.json", updatedProducts);
+
+    return res.status(200).json({
+      success: true,
+      message: "Product updated successfully",
+      product: updatedProduct,
+    });
   } catch (error) {
-    return res.status(500).json({ success: false, message: "Server error" });
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 }

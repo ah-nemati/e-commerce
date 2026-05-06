@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CartItem } from "../components/Tools/CartItem";
-import PersianNumber from "../Hooks/PersianNumber";
+import PersianNumber from "../hooks/PersianNumber";
 import { State, ProductType as CartItemType } from "../types/index";
 import { Dispatch } from "redux";
 import { Action } from "../types/index";
@@ -14,7 +14,7 @@ const Cart = () => {
 
   useEffect(() => {
     setsumPrice(
-      cartProduct.reduce((prev, curr) => prev + curr.price * curr.Quantity, 0)
+      cartProduct.reduce((prev, curr) => prev + curr.price * curr.Quantity, 0),
     );
   }, [cartProduct]);
 

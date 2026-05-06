@@ -5,7 +5,7 @@ const initialState: State = {
   message: { status: "", message: "" },
   products: [],
   cart: [],
-  theme: "light",
+  theme: "system",
   filteredProducts: [],
 };
 
@@ -36,7 +36,7 @@ export default (state: State = initialState, action: Action): State => {
         cart: action.payload.product.map((item) =>
           item.id === action.payload.id
             ? { ...item, Quantity: item.Quantity + 1 }
-            : { ...item, Quantity: item.Quantity }
+            : { ...item, Quantity: item.Quantity },
         ),
       };
     case "DECREASE_NUMBER_OF_PRODUCT":
@@ -45,7 +45,7 @@ export default (state: State = initialState, action: Action): State => {
         cart: action.payload.product.map((item) =>
           item.id === action.payload.id
             ? { ...item, Quantity: item.Quantity - 1 }
-            : { ...item, Quantity: item.Quantity }
+            : { ...item, Quantity: item.Quantity },
         ),
       };
     case "SET_THEME":

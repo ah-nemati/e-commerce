@@ -1,0 +1,38 @@
+[
+  {
+    "id": 5986643,
+    "Quanity": 1,
+    "title_fa": "گوشی موبایل شیائومی مدل Redmi Note 10 pro M2101K6G دو سیم‌ کارت ظرفیت 128 گیگابایت و رم 8 گیگابایت",
+    "data_layer": {
+      "brand": "شیائومی",
+      "category": "گوشی موبایل"
+    },
+    "images": {
+      "url": [
+        "https://dkstatics-public.digikala.com/digikala-products/3049dd8c073305e494f86d2959ac679febba7467_1627981167.jpg?x-oss-process=image/resize,m_lfit,h_300,w_300/quality,q_80"
+      ]
+    },
+    "rating": {
+      "rate": 88,
+      "count": 535
+    },
+    "price": 77770000,
+    "colors": [
+      {
+        "id": 11,
+        "title": "خاکستری",
+        "hex_code": "#9E9E9E"
+      },
+      {
+        "id": 4,
+        "title": "آبی",
+        "hex_code": "#2196f3"
+      },
+      {
+        "id": 64,
+        "title": "برنز",
+        "hex_code": "#c77b30"
+      }
+    ]
+  }
+]
