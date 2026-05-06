@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ColorProducts } from "../../components/Tools/ColorProducts";
-import PersianNumber from "../../Hooks/PersianNumber";
+import PersianNumber from "../../hooks/PersianNumber";
 import { AddToCart, Notify } from "../../Store/Actions";
 import truck from "./../../images/truck.png";
 import { State, ProductType } from "../../types";

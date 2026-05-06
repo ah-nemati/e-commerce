@@ -1,21 +1,18 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import bcrypt from "bcrypt";
-import { readDB, writeDB } from "../../utils/db";
+import { readDB, writeDB } from "@/utils/db";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
   if (req.method !== "POST") {
-    return res
-      .status(405)
-      .json({ success: false, message: "Method not allowed" });
+    return res.status(405).json({ success: false });
   }
 
   try {
     const { email, password } = req.body;
 
-    // validation
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -25,9 +22,9 @@ export default async function handler(
 
     const users = await readDB("users.json");
 
-    const findUser = users.find((user) => user.email === email);
+    const exists = users.find((u: any) => u.email === email);
 
-    if (findUser) {
+    if (exists) {
       return res.status(409).json({
         success: false,
         message: "User already exists",
@@ -39,23 +36,16 @@ export default async function handler(
       email,
       password: await bcrypt.hash(password, 12),
       role: "user",
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(),
     };
 
-    const updatedUsers = [...users, newUser];
-
-    await writeDB("users.json", updatedUsers);
+    await writeDB("users.json", [...users, newUser]);
 
     return res.status(201).json({
       success: true,
-      message: "User created successfully",
+      message: "User created",
     });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+  } catch (err) {
+    return res.status(500).json({ success: false });
   }
 }

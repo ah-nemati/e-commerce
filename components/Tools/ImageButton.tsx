@@ -12,7 +12,7 @@ export const ImageButton: FC<Props> = ({ src, value, ...rest }) => {
   return (
     <button
       className="bg-white dark:bg-slate-700 dark:text-white dark:border-none border border-transparent hover:text-gray-700
-       text-gray-500 rounded-lg shadow-imgbtn h-14 px-4 flex items-center
+       text-gray-500 rounded-lg shadow-imgBtn h-14 px-4 flex items-center
         sm:justify-start justify-center hover:bg-blue-700 group
         hover:bg-opacity-20 dark:shadow-none duration-200 gap-2 md:text-base text-sm"
       {...rest}

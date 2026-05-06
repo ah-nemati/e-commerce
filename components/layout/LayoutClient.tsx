@@ -4,8 +4,8 @@ import { ReactNode, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { State } from "../../types";
 import { Toast } from "../Tools/Toast";
-import { Footer } from "./Footer";
-import { Navbar } from "./Navbar";
+import { Footer } from "./Footer/Index";
+import { Navbar } from "./NavBar/Index";
 
 export default function LayoutClient({ children }: { children: ReactNode }) {
   const [IsShow, setIsShow] = useState(false);

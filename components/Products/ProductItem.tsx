@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import PersianNumber from "../../Hooks/PersianNumber";
+import PersianNumber from "../../hooks/PersianNumber";
 import { AddToCart, Notify } from "../../Store/Actions";
 import { ProductType, State } from "@/types";
 

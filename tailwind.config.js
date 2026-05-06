@@ -1,7 +1,8 @@
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   mode: "jit",
-  darkMode:'class',
-  content: ["./components/**/*.{html,js}", "./pages/**/*.{html,js}"],
+  darkMode: "class",
+  content: ["./components/**/*.{html,jsx,tsx}", "./pages/**/*.{html,jsx,tsx}"],
   theme: {
     extend: {
       screens: {
@@ -10,7 +11,7 @@ module.exports = {
       colors: { primary: "#ff5c39" },
       boxShadow: {
         custom: "0px 0px 10px 2px #e3e0e0",
-        imgbtn: "0px 0px 1px .5px #e3e0e0",
+        imgBtn: "0px 0px 1px .5px #e3e0e0",
       },
       keyframes: {
         wiggle: {
