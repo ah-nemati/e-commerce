@@ -1,33 +1,36 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { verifyToken } from "./utils/auth";
+import { jwtVerify } from "jose";
 
-export function middleware(req: NextRequest) {
-  const token = req.cookies.get("token")?.value;
+const SECRET = new TextEncoder().encode(
+  process.env.JWT_SECRET || "SUPER_SECRET",
+);
 
-  const isAuthRoute = req.nextUrl.pathname.startsWith("/api/auth");
+const SIGNIN_URL = "/Auth/Signin";
+const PROTECTED_ROUTES = ["/admin", "/dashboard"];
 
-  // اجازه به auth routes
-  if (isAuthRoute) return NextResponse.next();
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
 
-  // مسیرهای محافظت شده
-  const protectedRoutes = ["/admin", "/dashboard"];
-
-  const isProtected = protectedRoutes.some((route) =>
-    req.nextUrl.pathname.startsWith(route),
+  const isProtected = PROTECTED_ROUTES.some((route) =>
+    pathname.startsWith(route),
   );
 
   if (!isProtected) return NextResponse.next();
 
+  const token = req.cookies.get("token")?.value;
+
   if (!token) {
-    return NextResponse.redirect(new URL("/signin", req.url));
+    return NextResponse.redirect(new URL(SIGNIN_URL, req.url));
   }
 
   try {
-    verifyToken(token);
+    await jwtVerify(token, SECRET);
     return NextResponse.next();
   } catch {
-    return NextResponse.redirect(new URL("/signin", req.url));
+    const response = NextResponse.redirect(new URL(SIGNIN_URL, req.url));
+    response.cookies.delete("token");
+    return response;
   }
 }
 

@@ -69,7 +69,7 @@ const Signup: NextPage = () => {
       }
 
       dispatch(Notify("success", "ثبت نام با موفقیت انجام شد"));
-      router.push("/Auth/Signin");
+      router.push("/Signin");
     } catch {
       dispatch(Notify("error", "خطای سرور"));
     } finally {

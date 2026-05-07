@@ -113,7 +113,7 @@ const Signin: NextPage = () => {
           {/* 
           <AuthFooter
             text="آیا قبلا ثبت نام نکرده اید؟"
-            link="/Auth/Signup"
+            link="/auth/Signup"
             linkText="ثبت نام"
           /> */}
         </div>

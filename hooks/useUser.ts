@@ -1,40 +1,39 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 type User = {
-  id: number;
   email: string;
-  role: string;
-  iat?: number;
-  exp?: number;
-};
+  role?: string | null;
+} | null;
 
 export function useUser() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await fetch("/api/me", {
-          credentials: "include",
-        });
+  const fetchUser = useCallback(async () => {
+    try {
+      setLoading(true);
 
-        if (!res.ok) {
-          setUser(null);
-          return;
-        }
+      const res = await fetch("/api/me", {
+        credentials: "include",
+      });
 
-        const data = await res.json();
-        setUser(data);
-      } catch (err) {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
+      const data = await res.json();
 
-    fetchUser();
+      setUser(data.user ?? null);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  return { user, loading };
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
+  return {
+    user,
+    loading,
+    refetch: fetchUser,
+  };
 }

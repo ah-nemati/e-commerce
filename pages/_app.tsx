@@ -1,6 +1,6 @@
 import "../styles/globals.css";
 import { Provider } from "react-redux";
-import LayoutClient from "@/components/layout/LayoutClient";
+import LayoutClient from "@/components/Layout/LayoutClient";
 import store from "@/Store";
 import type { AppProps } from "next/app";
 

@@ -17,53 +17,52 @@ type Params = {
 };
 
 const SORT_OPTIONS = [
-  { label: "پربازدید ترین", value: "visited" },
-  { label: "ارزان ترین", value: "price_asc" },
-  { label: "گران ترین", value: "price_desc" },
-  { label: "محبوب ترین", value: "rating" },
+  { label: "پربازدیدترین", value: "visited" },
+  { label: "ارزان‌ترین", value: "price_asc" },
+  { label: "گران‌ترین", value: "price_desc" },
+  { label: "محبوب‌ترین", value: "rating" },
 ];
+
+const INITIAL_PARAMS: Params = {
+  sort: "visited",
+  search: "",
+  category: "",
+  brand: "",
+  minPrice: "",
+  maxPrice: "",
+  page: 1,
+  limit: 12,
+};
 
 const Home: NextPage = () => {
   const [products, setProducts] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-
-  const [params, setParams] = useState<Params>({
-    sort: "visited",
-    search: "",
-    category: "",
-    brand: "",
-    minPrice: "",
-    maxPrice: "",
-    page: 1,
-    limit: 10,
-  });
+  const [total, setTotal] = useState(0);
+  const [params, setParams] = useState<Params>(INITIAL_PARAMS);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const buildQuery = new URLSearchParams({
-        sort: params.sort,
-        search: params.search,
-        category: params.category,
-        brand: params.brand,
-        minPrice: params.minPrice,
-        maxPrice: params.maxPrice,
-        page: String(params.page),
-        limit: String(params.limit),
-      }).toString();
+      const query = new URLSearchParams(
+        Object.fromEntries(
+          Object.entries(params).map(([k, v]) => [k, String(v)]),
+        ),
+      ).toString();
 
-      const res = await fetch(`/api/products?${buildQuery}`);
+      const res = await fetch(`/api/products?${query}`);
       const data = await res.json();
 
       setProducts(data.products || []);
       setHasMore(data.hasMore || false);
+      setTotal(data.total || 0);
     } catch (err) {
       console.error(err);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
-  }, [params]); // تابع فقط وقتی پارامترها واقعاً تغییر کنند عوض می‌شود[cite: 2]
+  }, [params]);
 
   useEffect(() => {
     fetchProducts();
@@ -71,72 +70,107 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     const handleSearch = (e: CustomEvent<string>) => {
-      setParams((prev) => ({
-        ...prev,
-        search: e.detail,
-        page: 1,
-      }));
+      setParams((prev) => ({ ...prev, search: e.detail, page: 1 }));
     };
-
     window.addEventListener("product-search", handleSearch as EventListener);
-    return () => {
+    return () =>
       window.removeEventListener(
         "product-search",
         handleSearch as EventListener,
       );
-    };
   }, []);
 
-  const getSortClass = (value: string) =>
-    params.sort === value
-      ? "font-bold text-gray-700 dark:text-white"
-      : "font-normal text-gray-500";
+  const setSort = (value: string) =>
+    setParams((prev) => ({ ...prev, sort: value, page: 1 }));
 
   return (
-    <div className="bg-gray-100 dark:text-white dark:bg-gray-500">
-      <div className="flex justify-center md:p-14 p-2 bg-gray-100 dark:bg-slate-800">
-        <div className="xl:flex hidden w-full xl:w-1/4 h-fit xl:sticky xl:top-24">
+    <div dir="rtl" className="min-h-screen bg-gray-50 dark:bg-slate-950">
+      <div className="flex gap-5 px-4 md:px-8 py-6 max-w-screen-2xl mx-auto">
+        {/* Sidebar Filter */}
+        <aside className="xl:flex hidden w-72 shrink-0 h-fit sticky top-24">
           <Filter params={params} setParams={setParams} />
-        </div>
+        </aside>
 
-        <div className="flex flex-col w-full xl:w-3/4 gap-4">
-          <div className="flex gap-3 dark:bg-slate-900 text-gray-500 bg-white rounded p-3 items-center">
-            <span className="bg-orange-100 dark:bg-slate-700 p-1 rounded">
+        {/* Main Content */}
+        <div className="flex flex-col flex-1 gap-4 min-w-0">
+          {/* Sort Bar */}
+          <div
+            dir="rtl"
+            className="flex items-center gap-2 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 px-5 py-3"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 text-orange-500 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="2"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"
+              />
+            </svg>
+            <span className="text-xs text-gray-400 dark:text-slate-500 ml-1 shrink-0">
+              مرتب‌سازی:
+            </span>
+            <div className="flex items-center gap-1 flex-wrap">
+              {SORT_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setSort(opt.value)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    params.sort === opt.value
+                      ? "bg-orange-500 text-white shadow-sm"
+                      : "text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+
+            {total > 0 && !loading && (
+              <span className="mr-auto text-xs text-gray-400 dark:text-slate-500 shrink-0">
+                {total} محصول
+              </span>
+            )}
+          </div>
+
+          {/* Search result banner */}
+          {params.search && (
+            <div className="flex items-center gap-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800/30 rounded-xl px-4 py-3">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-7 w-7 stroke-orange-600"
+                className="h-4 w-4 text-orange-500"
                 fill="none"
                 viewBox="0 0 24 24"
+                strokeWidth="2"
                 stroke="currentColor"
-                strokeWidth={2}
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                 />
               </svg>
-            </span>
-
-            <div className="flex gap-6 mr-2">
-              {SORT_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  className={`relative ${getSortClass(opt.value)}`}
-                  onClick={() =>
-                    setParams((prev) => ({ ...prev, sort: opt.value, page: 1 }))
-                  }
-                >
-                  {opt.label}
-                  {params.sort === opt.value && (
-                    <span className="bg-orange-600 w-2 h-2 absolute rounded-full -top-1" />
-                  )}
-                </button>
-              ))}
+              <span className="text-sm text-orange-700 dark:text-orange-300">
+                نتایج جستجو برای: <strong>&laquo;{params.search}&raquo;</strong>
+              </span>
+              <button
+                onClick={() =>
+                  setParams((p) => ({ ...p, search: "", page: 1 }))
+                }
+                className="mr-auto text-xs text-orange-500 hover:text-orange-700 underline underline-offset-2"
+              >
+                پاک کردن
+              </button>
             </div>
-          </div>
+          )}
 
-          <div className="flex flex-row custom:flex-col sm:flex-wrap">
+          {/* Products Grid */}
+          <div className="flex flex-row flex-wrap -m-1.5">
             {loading ? (
               <ProductLoad />
             ) : products.length > 0 ? (
@@ -144,34 +178,104 @@ const Home: NextPage = () => {
                 <ProductItem product={item} key={item.id} />
               ))
             ) : (
-              <div className="text-center w-full py-10">محصولی یافت نشد</div>
+              <div className="flex flex-col items-center justify-center w-full py-24 gap-4 text-gray-400 dark:text-slate-500">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-16 h-16 opacity-30"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
+                  />
+                </svg>
+                <p className="text-base font-medium">محصولی یافت نشد</p>
+                <button
+                  onClick={() => setParams(INITIAL_PARAMS)}
+                  className="text-sm text-orange-500 hover:text-orange-600 underline underline-offset-4"
+                >
+                  پاک کردن فیلترها
+                </button>
+              </div>
             )}
           </div>
 
-          <div className="flex gap-2 justify-center mt-4">
-            <button
-              className="px-4 py-2 bg-gray-200 dark:bg-slate-700 rounded hover:bg-gray-300 disabled:opacity-50"
-              disabled={params.page === 1}
-              onClick={() =>
-                setParams((prev) => ({
-                  ...prev,
-                  page: Math.max(1, prev.page - 1),
-                }))
-              }
-            >
-              قبلی
-            </button>
-            <span className="px-4 py-2">صفحه {params.page}</span>
-            <button
-              className="px-4 py-2 bg-gray-200 dark:bg-slate-700 rounded hover:bg-gray-300 disabled:opacity-50"
-              disabled={!hasMore}
-              onClick={() =>
-                setParams((prev) => ({ ...prev, page: prev.page + 1 }))
-              }
-            >
-              بعدی
-            </button>
-          </div>
+          {/* Pagination */}
+          {!loading && products.length > 0 && (
+            <div className="flex items-center justify-center gap-2 mt-2">
+              <button
+                disabled={params.page === 1}
+                onClick={() =>
+                  setParams((p) => ({ ...p, page: Math.max(1, p.page - 1) }))
+                }
+                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium rounded-xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:border-orange-300 hover:text-orange-500 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:text-gray-600 transition-all"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                  />
+                </svg>
+                قبلی
+              </button>
+
+              <div className="flex items-center gap-1">
+                {Array.from(
+                  { length: Math.min(5, Math.ceil(total / params.limit) || 1) },
+                  (_, i) => {
+                    const page = i + 1;
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => setParams((p) => ({ ...p, page }))}
+                        className={`w-9 h-9 rounded-xl text-sm font-medium transition-all ${
+                          params.page === page
+                            ? "bg-orange-500 text-white shadow-sm"
+                            : "bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:border-orange-300 hover:text-orange-500"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  },
+                )}
+              </div>
+
+              <button
+                disabled={!hasMore}
+                onClick={() => setParams((p) => ({ ...p, page: p.page + 1 }))}
+                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium rounded-xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:border-orange-300 hover:text-orange-500 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:text-gray-600 transition-all"
+              >
+                بعدی
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.75 19.5L8.25 12l7.5-7.5"
+                  />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

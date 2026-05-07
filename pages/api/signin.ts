@@ -42,8 +42,7 @@ export default async function handler(
         .json({ success: false, message: "Invalid credentials" });
     }
 
-    // 👇 فقط اطلاعات مهم داخل token
-    const token = signToken({
+    const token = await signToken({
       id: user.id,
       email: user.email,
       role: user.role,

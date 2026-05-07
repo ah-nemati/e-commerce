@@ -28,7 +28,11 @@ export default async function handler(
     const newProduct = {
       id: crypto.randomUUID(), // بهتر از Date.now
       title_fa: title,
-      images: {
+      rating: {
+        rate: 88,
+        count: 535,
+      },
+      image: {
         url: link || "",
       },
       data_layer: {
