@@ -63,7 +63,6 @@ const Signin: NextPage = () => {
         ),
       );
 
-      // ✅ Notify all useUser instances to refetch — Profile updates immediately
       dispatchAuthChange();
 
       router.push("/");

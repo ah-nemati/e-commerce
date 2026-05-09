@@ -4,7 +4,6 @@ import fs from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
 
-// ✅ Disable Next.js default body parser for multipart/form-data
 export const config = {
   api: { bodyParser: false },
 };
