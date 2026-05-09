@@ -66,16 +66,17 @@ export const CartItem: FC<Props> = ({ product, cartProduct, dispatch }) => {
           {product.title_fa}
         </p>
 
-        {/* Color indicator if available */}
-        {product.selectedColor && (
-          <div className="flex items-center gap-1.5">
-            <span
-              className="w-3 h-3 rounded-full border border-gray-200 dark:border-slate-500 shrink-0"
-              style={{ background: product.selectedColor.hex_code }}
-            />
-            <span className="text-xs text-gray-400 dark:text-slate-500">
-              {product.selectedColor.title}
-            </span>
+        {/* Available colors */}
+        {product.colors?.length > 0 && (
+          <div className="flex items-center gap-1 flex-wrap">
+            {product.colors.map((c) => (
+              <span
+                key={c.id}
+                title={c.title}
+                className="w-3.5 h-3.5 rounded-full border border-gray-200 dark:border-slate-500 shrink-0"
+                style={{ background: c.hex_code }}
+              />
+            ))}
           </div>
         )}
 
