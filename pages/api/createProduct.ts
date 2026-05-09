@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { randomUUID } from "crypto";
 import { readDB, writeDB } from "../../utils/db";
 
 export default async function handler(
@@ -15,7 +16,6 @@ export default async function handler(
   try {
     const { color, link, title, brand, category, price } = req.body;
 
-    // validation
     if (!title || !price || !brand || !category) {
       return res.status(400).json({
         success: false,
@@ -25,18 +25,46 @@ export default async function handler(
 
     const products = await readDB("products.json");
 
+    const imageUrls: string[] = (() => {
+      if (!link) return [];
+
+      if (Array.isArray(link)) {
+        return link.filter(
+          (url) =>
+            typeof url === "string" &&
+            (url.startsWith("http://") ||
+              url.startsWith("https://") ||
+              url.startsWith("/")),
+        );
+      }
+
+      if (typeof link === "string") {
+        return link.startsWith("http://") ||
+          link.startsWith("https://") ||
+          link.startsWith("/")
+          ? [link]
+          : [];
+      }
+
+      return [];
+    })();
+
     const newProduct = {
-      id: crypto.randomUUID(), // بهتر از Date.now
+      id: randomUUID(),
       title_fa: title,
-      images: {
-        url: link || "",
+      rating: {
+        rate: 88,
+        count: 535,
+      },
+      image: {
+        url: imageUrls, // همیشه آرایه واقعی
       },
       data_layer: {
         brand,
         category,
       },
-      price,
-      colors: color || [],
+      price: Number(price),
+      colors: Array.isArray(color) ? color : [],
     };
 
     const updatedProducts = [...products, newProduct];
@@ -48,12 +76,12 @@ export default async function handler(
       message: "Product created successfully",
       product: newProduct,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Create product error:", error);
 
     return res.status(500).json({
       success: false,
-      message: error.message || "Server error",
+      message: "Internal Server Error",
     });
   }
 }

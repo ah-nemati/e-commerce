@@ -1,40 +1,37 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 type User = {
-  id: number;
   email: string;
-  role: string;
-  iat?: number;
-  exp?: number;
+  role?: string | null;
+} | null;
+
+export const dispatchAuthChange = () => {
+  window.dispatchEvent(new Event("auth:change"));
 };
 
 export function useUser() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await fetch("/api/me", {
-          credentials: "include", // مهم برای cookie
-        });
-
-        if (!res.ok) {
-          setUser(null);
-          return;
-        }
-
-        const data = await res.json();
-        setUser(data);
-      } catch (err) {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
+  const fetchUser = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/me", { credentials: "include" });
+      const data = await res.json();
+      setUser(data.user ?? null);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  return { user, loading };
+  useEffect(() => {
+    fetchUser();
+
+    window.addEventListener("auth:change", fetchUser);
+    return () => window.removeEventListener("auth:change", fetchUser);
+  }, [fetchUser]);
+
+  return { user, loading, refetch: fetchUser };
 }

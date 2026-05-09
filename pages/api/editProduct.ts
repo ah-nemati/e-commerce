@@ -14,7 +14,7 @@ export default async function handler(
 
   try {
     const body = req.body?.product || req.body;
-    const { id, colors, images, title_fa, data_layer, price } = body;
+    const { id, colors, image, title_fa, data_layer, price } = body;
 
     // validation
     if (!id) {
@@ -38,7 +38,7 @@ export default async function handler(
     const updatedProduct = {
       ...products[index],
       title_fa,
-      images,
+      image,
       data_layer,
       price,
       colors,

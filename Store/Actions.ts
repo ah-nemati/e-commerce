@@ -1,7 +1,5 @@
 import {
-  User,
   Action,
-  USER_DETAIL,
   NOTIFY,
   ADD_TO_CART,
   REMOVE_CART,
@@ -14,10 +12,6 @@ import {
   PRODUCT,
   ProductType,
 } from "../types/index";
-
-export const Auth = (args: User): Action => {
-  return { type: USER_DETAIL, payload: args };
-};
 
 export const Notify = (status: string, message: string): Action => {
   return { type: NOTIFY, payload: { status, message } };
@@ -35,15 +29,21 @@ export const RemoveCart = (id: string): Action => {
   return { type: REMOVE_CART, payload: id };
 };
 
-export const increaseNumOfProduct = (id: string, product: ProductType[]): Action => {
+export const increaseNumOfProduct = (
+  id: string,
+  product: ProductType[],
+): Action => {
   return { type: INCREASE_NUMBER_OF_PRODUCT, payload: { id, product } };
 };
 
-export const decreaseNumOfProduct = (id: string, product: ProductType[]): Action => {
+export const decreaseNumOfProduct = (
+  id: string,
+  product: ProductType[],
+): Action => {
   return { type: DECREASE_NUMBER_OF_PRODUCT, payload: { id, product } };
 };
 
-export const SetTheme = (theme: 'light' | 'dark'|'system'): Action => {
+export const SetTheme = (theme: "light" | "dark" | "system"): Action => {
   return { type: SET_THEME, payload: theme };
 };
 

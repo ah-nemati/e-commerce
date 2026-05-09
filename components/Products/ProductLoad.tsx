@@ -1,34 +1,29 @@
 import React from "react";
 
 const LoadCard: React.FC = () => (
-  <div
-    className="flex sm:flex-col gap-8 dark:bg-slate-900 dark:border-slate-700 bg-white cursor-pointer items-center shadow-gray-700
-    border md:w-1/3 xl:w-1/4 sm:w-1/2 p-2 hover:shadow-custom text-gray-800 relative "
-  >
-    {/* cartImage */}
-    <div className="bg-gray-100 h-[40vh] sm:w-4/5 w-1/3 animate-pulse"></div>
-    {/* bodyCart */}
-    <div className="flex flex-col gap-4 sm:w-full w-2/3">
-      {/* titleCart */}
-      <div className="flex self-center text-xs sm:text-sm p-4 w-1/2 bg-gray-100 animate-pulse"></div>
-      {/* rate */}
-      <div className="flex gap-1 bg-gray-100 w-3/4 h-10 self-center animate-pulse"></div>
-      {/* add to Cart */}
-      <div className="flex justify-between text-sm bg-gray-100 h-10 w-10/12 self-center animate-pulse"></div>
-    </div>
-    {/* color */}
-    <div className="w-2 h-auto flex flex-col absolute bottom-1 top-4 sm:left-2 gap-2">
-      {}
+  <div className="w-full sm:w-1/2 md:w-1/3 xl:w-1/4 p-1.5">
+    <div className="flex flex-col bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl overflow-hidden">
+      <div className="aspect-square bg-gray-100 dark:bg-slate-800 animate-pulse" />
+      <div className="flex flex-col gap-3 p-4">
+        <div className="w-16 h-5 bg-gray-100 dark:bg-slate-800 rounded-lg animate-pulse" />
+        <div className="flex flex-col gap-1.5">
+          <div className="w-full h-4 bg-gray-100 dark:bg-slate-800 rounded animate-pulse" />
+          <div className="w-3/4 h-4 bg-gray-100 dark:bg-slate-800 rounded animate-pulse" />
+        </div>
+        <div className="w-24 h-3 bg-gray-100 dark:bg-slate-800 rounded animate-pulse" />
+        <div className="flex items-center justify-between pt-2 border-t border-gray-50 dark:border-slate-800">
+          <div className="w-20 h-5 bg-gray-100 dark:bg-slate-800 rounded animate-pulse" />
+          <div className="w-20 h-8 bg-gray-100 dark:bg-slate-800 rounded-xl animate-pulse" />
+        </div>
+      </div>
     </div>
   </div>
 );
 
-export const ProductLoad: React.FC = () => {
-  return (
-    <>
-      {[...Array(8)].map((_, index: number) => (
-        <LoadCard key={index} />
-      ))}
-    </>
-  );
-};
+export const ProductLoad: React.FC = () => (
+  <>
+    {Array.from({ length: 8 }).map((_, i) => (
+      <LoadCard key={i} />
+    ))}
+  </>
+);
