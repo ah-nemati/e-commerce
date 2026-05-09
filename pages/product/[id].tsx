@@ -90,7 +90,6 @@ const MOCK_REVIEWS = [
 
 const ProductDetail: NextPage = () => {
   const router = useRouter();
-  console.log(router);
   const dispatch = useDispatch();
   const { id } = router.query;
   const cart = useSelector((state: State) => state.cart);
@@ -140,7 +139,7 @@ const ProductDetail: NextPage = () => {
 
   const ratingStars = product ? Math.round((product.rating.rate * 5) / 100) : 0;
   const images = product?.image?.url ?? [];
-  console.log(images);
+
   if (loading) {
     return (
       <div className="mt-4 px-4 md:px-8 animate-pulse">

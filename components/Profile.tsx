@@ -39,8 +39,8 @@ const Profile = () => {
   }
 
   return (
-    <Link href="/auth/Signin">
-      <button className="md:flex hidden items-center gap-3 text-xs border p-2 rounded-md">
+    <Link href="/Auth/Signin">
+      <button className="md:flex hidden dark:text-white text-gray-600 items-center gap-3 text-xs border p-2 rounded-md">
         <ProfileIcon />
         ورود به حساب کاربری
       </button>

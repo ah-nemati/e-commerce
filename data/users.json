@@ -1,9 +1,16 @@
 [
   {
+    "id": 1778328845883,
+    "email": "aaa@aaa.aaa",
+    "password": "$2b$12$9KXTopHtvONJXVRMcdoDVuX2Wxt4zTo6KkANvceD.gglbSKZ9doj6",
+    "role": "user",
+    "createdAt": "2026-05-09T12:14:06.371Z"
+  },
+  {
+    "id": 1778336195921,
     "email": "asd@asd.asd",
-    "password": "$2b$12$/hHveJcXDiZa4B.SgQzoWOmYiPBMl4YkfhQOdPyHcXRvwGwyuGi2.",
-    "role": true,
-    "createdAt": "2023-05-21T22:27:34.026Z",
-    "updatedAt": "2023-05-21T22:27:34.026Z"
+    "password": "$2b$12$7f1EJXHOS80BRVOwgg46UeginnyLB/5FvIPYMA1JGn0Qn35MCm.k.",
+    "role": "admin",
+    "createdAt": "2026-05-09T14:16:36.597Z"
   }
 ]

@@ -42,6 +42,21 @@ const labelClass =
 const FieldError = ({ msg }: { msg?: string }) =>
   msg ? <p className="text-red-500 text-xs mt-1">{msg}</p> : null;
 
+const testImageUrl = (url: string): Promise<boolean> => {
+  return new Promise((resolve) => {
+    try {
+      new URL(url); // basic format check first
+    } catch {
+      resolve(false);
+      return;
+    }
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = url;
+  });
+};
+
 interface EditProductProps {
   productId: string;
   onBack: () => void;
@@ -66,16 +81,17 @@ const EditProduct: React.FC<EditProductProps> = ({ productId, onBack }) => {
 
   useEffect(() => {
     if (!productId) return;
+
     axios
-      .post<{ product: ProductType[] }>("/api/productDetail", {
-        id: productId,
+      .get<{ success: boolean; product: ProductType }>("/api/productDetail", {
+        params: { id: productId },
       })
       .then((res) => {
-        const p = res.data.product[0];
+        const p = res.data.product;
         if (!p) return;
         setForm({
           title: p.title_fa ?? "",
-          link: p.image?.url[0] ?? "",
+          link: p.image?.url?.[0] ?? "",
           price: String(p.price ?? ""),
           brand: p.data_layer?.brand ?? BRANDS[0],
           category: p.data_layer?.category ?? CATEGORIES[0],
@@ -84,7 +100,7 @@ const EditProduct: React.FC<EditProductProps> = ({ productId, onBack }) => {
       })
       .catch(() => dispatch(Notify("error", "خطا در دریافت محصول")))
       .finally(() => setLoading(false));
-  }, [productId]);
+  }, [productId, dispatch]);
 
   const handleChange = (key: keyof FormState, value: string) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -100,11 +116,8 @@ const EditProduct: React.FC<EditProductProps> = ({ productId, onBack }) => {
     if (!form.link) {
       newErrors.link = "لینک تصویر الزامی است";
     } else {
-      try {
-        await axios.get(form.link);
-      } catch {
-        newErrors.link = "لینک تصویر معتبر نیست";
-      }
+      const isValid = await testImageUrl(form.link);
+      if (!isValid) newErrors.link = "لینک تصویر معتبر نیست";
     }
 
     if (!colors.length) newErrors.colors = "حداقل یک رنگ وجود داشته باشد";

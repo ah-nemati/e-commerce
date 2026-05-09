@@ -1,7 +1,6 @@
 import { Action, State } from "@/types";
 
 const initialState: State = {
-  user: null,
   message: { status: "", message: "" },
   products: [],
   cart: [],
@@ -11,8 +10,6 @@ const initialState: State = {
 
 export default (state: State = initialState, action: Action): State => {
   switch (action.type) {
-    case "USER_DETAIL":
-      return { ...state, user: action.payload };
     case "NOTIFY":
       return {
         ...state,
@@ -52,8 +49,6 @@ export default (state: State = initialState, action: Action): State => {
       return { ...state, theme: action.payload };
     case "SET_FILTER":
       return { ...state, filteredProducts: action.payload };
-    case "LOG_OUT":
-      return { ...state, user: null };
     case "CLEAR_SEARCH": {
       return { ...state, filteredProducts: [] };
     }

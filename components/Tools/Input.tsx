@@ -1,69 +1,88 @@
 import { memo, useState, FC, ChangeEvent, MouseEvent, ReactNode } from "react";
+import EyeOffIcon from "./EyeOffIcon";
+import EyeIcon from "./EyeIcon";
 
 interface InputProps {
-    data: string;
-    jsx: ReactNode;
-    aLink?: ReactNode;
-    label?: string;
-    value: string;
-    onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  data: string;
+  jsx?: ReactNode;
+  aLink?: ReactNode;
+  label?: string;
+  value: string;
+  type?: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
-const Input: FC<InputProps> = ({ data, jsx, aLink, label, value, onChange }) => {
-  const [IshowPasword, setIshowPasword] = useState(false);
-  const handleShowPasword = (e: MouseEvent<HTMLButtonElement>) => {
+const Input: FC<InputProps> = ({
+  data,
+  aLink,
+  label,
+  value,
+  type = "text",
+  onChange,
+}) => {
+  const [showPassword, setShowPassword] = useState(false);
+
+  const isPasswordField = type === "password";
+
+  const handleShowPassword = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (data === "password") {
-      setIshowPasword(!IshowPasword);
+
+    if (isPasswordField) {
+      setShowPassword((prev) => !prev);
     }
   };
 
   return (
-    <>
-      <label
-        htmlFor={data}
-        className="flex flex-col text-gray-600 dark:text-white text-sm gap-2"
+    <label
+      htmlFor={data}
+      className="flex flex-col gap-2 text-sm text-gray-600 dark:text-white"
+    >
+      {/* LABEL */}
+      <div className="flex items-center justify-between">
+        <span>{label || data}</span>
+        {aLink}
+      </div>
+
+      {/* INPUT WRAPPER */}
+      <div
+        className="
+          flex items-center rounded-xl border border-gray-200
+          bg-gray-50 px-3 py-3 transition-all duration-200
+          hover:border-blue-400 focus-within:border-blue-500
+          focus-within:ring-2 focus-within:ring-blue-100
+          dark:border-slate-700 dark:bg-slate-800
+        "
       >
-        <div className="flex justify-between">
-          {label ? label : data} {aLink}
-        </div>
-        <div
-          className="bg-dark dark:bg-slate-800 dark:border-none border flex flex-row p-2 text-base rounded-md 
-          hover:border-blue-500"
-        >
-          <input
-            className="flex-1 outline-none dark:bg-slate-800 dark:text-white bg-gray-100 border-0"
-            type={data === "password" ? (IshowPasword ? "text" : "password") : data}
-            id={data}
-            value={value}
-            onChange={onChange}
-            required
-          />
-          <button onClick={handleShowPasword}>
-            {!IshowPasword ? (
-              jsx
-            ) : (
-              <>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 stroke-slate-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
-                  />
-                </svg>
-              </>
-            )}
+        <input
+          id={data}
+          value={value}
+          onChange={onChange}
+          required
+          type={isPasswordField ? (showPassword ? "text" : "password") : type}
+          className="
+            w-full flex-1 border-none bg-transparent text-sm
+            outline-none placeholder:text-gray-400
+            dark:text-white dark:placeholder:text-gray-500
+            
+            /* -- ترفند تاخیر ترانزیشن برای حل مشکل Autofill -- */
+            [&:-webkit-autofill]:[transition:background-color_9999s_ease-in-out_0s]
+            [&:-webkit-autofill]:[-webkit-text-fill-color:#4b5563]
+            dark:[&:-webkit-autofill]:[-webkit-text-fill-color:#fff]
+          "
+        />
+
+        {/* PASSWORD TOGGLE */}
+        {isPasswordField && (
+          <button
+            type="button"
+            onClick={handleShowPassword}
+            className="mr-2 cursor-pointer text-slate-500 transition hover:text-blue-500 focus:outline-none"
+          >
+            {showPassword ? <EyeOffIcon /> : <EyeIcon />}
           </button>
-        </div>
-      </label>
-    </>
+        )}
+      </div>
+    </label>
   );
 };
 

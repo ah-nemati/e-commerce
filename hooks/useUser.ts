@@ -5,6 +5,10 @@ type User = {
   role?: string | null;
 } | null;
 
+export const dispatchAuthChange = () => {
+  window.dispatchEvent(new Event("auth:change"));
+};
+
 export function useUser() {
   const [user, setUser] = useState<User>(null);
   const [loading, setLoading] = useState(true);
@@ -12,13 +16,8 @@ export function useUser() {
   const fetchUser = useCallback(async () => {
     try {
       setLoading(true);
-
-      const res = await fetch("/api/me", {
-        credentials: "include",
-      });
-
+      const res = await fetch("/api/me", { credentials: "include" });
       const data = await res.json();
-
       setUser(data.user ?? null);
     } catch {
       setUser(null);
@@ -29,11 +28,10 @@ export function useUser() {
 
   useEffect(() => {
     fetchUser();
+
+    window.addEventListener("auth:change", fetchUser);
+    return () => window.removeEventListener("auth:change", fetchUser);
   }, [fetchUser]);
 
-  return {
-    user,
-    loading,
-    refetch: fetchUser,
-  };
+  return { user, loading, refetch: fetchUser };
 }

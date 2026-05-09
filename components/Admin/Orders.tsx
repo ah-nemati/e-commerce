@@ -8,8 +8,8 @@ const Orders: React.FC = () => {
   const dispatch = useDispatch();
 
   return (
-    <div className="flex flex-col rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-gray-100 dark:border-slate-700 w-full min-h-[40vh]">
-      <div className="p-6 border-b border-gray-100 dark:border-slate-700">
+    <div className="flex flex-col rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-gray-100 dark:border-slate-700 w-full">
+      <div className="p-6 border-b border-gray-100 dark:border-slate-700 shrink-0">
         <h2 className="text-lg font-bold text-gray-800 dark:text-white">
           سفارش‌های من
         </h2>
@@ -20,7 +20,7 @@ const Orders: React.FC = () => {
         )}
       </div>
 
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col overflow-y-auto max-h-[60vh]">
         {cart.length > 0 ? (
           cart.map((item: ProductType) => (
             <CartItem
@@ -31,7 +31,7 @@ const Orders: React.FC = () => {
             />
           ))
         ) : (
-          <div className="flex flex-col items-center justify-center flex-1 gap-4 py-16 text-gray-400 dark:text-slate-500">
+          <div className="flex flex-col items-center justify-center gap-4 py-16 text-gray-400 dark:text-slate-500">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"

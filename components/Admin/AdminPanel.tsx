@@ -41,14 +41,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   };
 
   return (
-    <div className="flex flex-col rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-gray-100 dark:border-slate-700 w-full">
+    <div className="flex flex-col rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-gray-100 dark:border-slate-700 w-full overflow-hidden">
       <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-slate-700">
         <h2 className="text-lg font-bold text-gray-800 dark:text-white">
           مدیریت محصولات
         </h2>
         <button
           onClick={onCreateClick}
-          className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shrink-0"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -95,7 +95,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
           {products.map((product) => (
             <div
               key={product.id}
-              className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-slate-700/40 transition-colors"
+              className="flex items-center gap-3 px-4 sm:px-6 py-4 hover:bg-gray-50 dark:hover:bg-slate-700/40 transition-colors min-w-0"
             >
               <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-slate-700 shrink-0">
                 {product.image?.url?.[0] && (
@@ -110,20 +110,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 )}
               </div>
 
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 overflow-hidden">
                 <p className="text-sm font-medium text-gray-800 dark:text-white truncate">
                   {product.title_fa}
                 </p>
-                <p className="text-xs text-gray-400 dark:text-slate-400 mt-0.5">
+                <p className="text-xs text-gray-400 dark:text-slate-400 mt-0.5 truncate">
                   {product.data_layer?.brand} · {product.data_layer?.category}
                 </p>
               </div>
 
-              <span className="text-sm font-medium text-orange-500 shrink-0">
+              <span className="hidden sm:block text-sm font-medium text-orange-500 shrink-0">
                 {product.price?.toLocaleString("fa-IR")} تومان
               </span>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-1 shrink-0">
                 <button
                   onClick={() => onEditClick(product.id)}
                   className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"

@@ -26,6 +26,21 @@ const labelClass =
 const FieldError = ({ msg }: { msg?: string }) =>
   msg ? <p className="text-red-500 text-xs mt-1">{msg}</p> : null;
 
+const testImageUrl = (url: string): Promise<boolean> => {
+  return new Promise((resolve) => {
+    try {
+      new URL(url); // basic format check first
+    } catch {
+      resolve(false);
+      return;
+    }
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = url;
+  });
+};
+
 interface CreateProductProps {
   onBack: () => void;
 }
@@ -59,11 +74,8 @@ const CreateProduct: React.FC<CreateProductProps> = ({ onBack }) => {
     if (!form.link) {
       newErrors.link = "لینک تصویر الزامی است";
     } else {
-      try {
-        await axios.get(form.link);
-      } catch {
-        newErrors.link = "لینک تصویر معتبر نیست";
-      }
+      const isValid = await testImageUrl(form.link);
+      if (!isValid) newErrors.link = "لینک تصویر معتبر نیست";
     }
 
     if (!colors.length) newErrors.colors = "حداقل یک رنگ اضافه کنید";
@@ -181,7 +193,13 @@ const CreateProduct: React.FC<CreateProductProps> = ({ onBack }) => {
               className={inputClass}
             >
               {BRANDS.map((b) => (
-                <option key={b}>{b}</option>
+                <option
+                  key={b}
+                  value={b}
+                  className="bg-white text-gray-900 dark:bg-slate-800 dark:text-white"
+                >
+                  {b}
+                </option>
               ))}
             </select>
           </div>
@@ -193,7 +211,13 @@ const CreateProduct: React.FC<CreateProductProps> = ({ onBack }) => {
               className={inputClass}
             >
               {CATEGORIES.map((c) => (
-                <option key={c}>{c}</option>
+                <option
+                  key={c}
+                  value={c}
+                  className="bg-white text-gray-900 dark:bg-slate-800 dark:text-white"
+                >
+                  {c}
+                </option>
               ))}
             </select>
           </div>
