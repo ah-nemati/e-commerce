@@ -1,13 +1,12 @@
 [
   {
     "id": 5986643,
-    "Quanity": 1,
     "title_fa": "گوشی موبایل شیائومی مدل Redmi Note 10 pro M2101K6G دو سیم‌ کارت ظرفیت 128 گیگابایت و رم 8 گیگابایت",
     "data_layer": {
       "brand": "شیائومی",
       "category": "گوشی موبایل"
     },
-    "images": {
+    "image": {
       "url": [
         "https://dkstatics-public.digikala.com/digikala-products/3049dd8c073305e494f86d2959ac679febba7467_1627981167.jpg?x-oss-process=image/resize,m_lfit,h_300,w_300/quality,q_80"
       ]
@@ -32,6 +31,71 @@
         "id": 64,
         "title": "برنز",
         "hex_code": "#c77b30"
+      }
+    ]
+  },
+  {
+    "id": "5f966138-332c-42c6-8ae0-6074a2449d0c",
+    "title_fa": "گوشی موبایل شیائومی مدل Redmi Note 14 4G دو سیم کارت ظرفیت 256 گیگابایت و رم 8 گیگابایت",
+    "image": {
+      "url": [
+        "https://dkstatics-public.digikala.com/digikala-products/c0a7ce006d11c222bce16bd3cdd8d79aeb6689bc_1738134271.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+      ]
+    },
+    "data_layer": {
+      "brand": "شیائومی",
+      "category": "گوشی موبایل"
+    },
+    "rating": {
+      "rate": 88,
+      "count": 535
+    },
+    "price": 38300000,
+    "colors": [
+      {
+        "id": "1778181449635",
+        "hex_code": "#3ef73b",
+        "title": "سبز"
+      },
+      {
+        "id": "1778181459102",
+        "hex_code": "#3b9cf7",
+        "title": "آبی"
+      },
+      {
+        "id": "1778181468277",
+        "hex_code": "#050505",
+        "title": "مشکی"
+      },
+      {
+        "id": "1778181477651",
+        "hex_code": "#ef26f2",
+        "title": "بنفش"
+      }
+    ]
+  },
+  {
+    "id": "39ca4f17-367b-446b-8203-9c1d9cf7472c",
+    "title_fa": "کیبورد گیمینگ ردراگون K617 FIZZ مکانیکال قرمز Tenkeyless با نورپردازی RGB قابل شخصی‌سازی، اتصال با سیم USB، سوییچ قابل تعویض سریع، پایه‌های قابل تنظیم و پشتیبانی از اپلیکیشن اختصاصی Redragon Zone",
+    "rating": {
+      "rate": 88,
+      "count": 535
+    },
+    "image": {
+      "url": [
+        "https://dkstatics-public.digikala.com/digikala-products/4cbc5632864107d27d2fe818e766d32be2ddceb0_1754246494.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/format,webp/quality,q_90"
+      ]
+    },
+    "data_layer": {
+      "brand": "متفرقه",
+      "category": "قطعات کامپیوتر"
+    },
+    "price": 6820000,
+    "colors": [
+      {
+        "id": "1778280215512",
+        "hex_code": "#161718",
+        "title": "مشکی"
       }
     ]
   }

@@ -5,16 +5,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  // فقط GET منطقیه برای گرفتن دیتای محصول
-  if (req.method !== "GET") {
-    return res.status(405).json({
-      success: false,
-      message: "Method not allowed",
-    });
-  }
-
   try {
-    const { id } = req.query;
+    const id = req.query.id ?? req.body?.id;
 
     if (!id) {
       return res.status(400).json({
@@ -39,7 +31,6 @@ export default async function handler(
       product,
     });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",

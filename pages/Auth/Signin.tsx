@@ -4,47 +4,55 @@ import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { useState, FormEvent } from "react";
 import { NextPage } from "next";
-
 import { ImageButton } from "../../components/Tools/ImageButton";
 import Input from "../../components/Tools/Input";
 import google from "../../images/google.png";
-import { Auth, Notify } from "../../Store/Actions";
+import { Notify } from "../../Store/Actions";
 import { validate } from "../../utils/validate";
 import Divider from "@/components/Tools/Divider";
-import EyeIcon from "@/components/Tools/EyeIcon";
+import { dispatchAuthChange } from "@/hooks/useUser";
 
 const Signin: NextPage = () => {
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const handleChange = (key: "email" | "password", value: string) => {
+  const handleChange = (key: "email" | "password", value: string) =>
     setForm((prev) => ({ ...prev, [key]: value }));
+
+  const validateForm = () => {
+    if (!form.email.trim()) return "ایمیل الزامی است";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
+      return "فرمت ایمیل صحیح نیست";
+    if (!form.password.trim()) return "رمز عبور الزامی است";
+    if (form.password.length < 6) return "رمز عبور باید حداقل ۶ کاراکتر باشد";
+    return null;
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const error = validateForm();
+    if (error) {
+      dispatch(Notify("error", error));
+      return;
+    }
+
     setLoading(true);
 
     try {
       const res = await fetch("/api/signin", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        dispatch(Notify("error", validate.USER_AUTH_ERROR));
+        dispatch(Notify("error", data.message || validate.USER_AUTH_ERROR));
         return;
       }
 
@@ -55,7 +63,8 @@ const Signin: NextPage = () => {
         ),
       );
 
-      dispatch(Auth(data.user));
+      // ✅ Notify all useUser instances to refetch — Profile updates immediately
+      dispatchAuthChange();
 
       router.push("/");
     } catch {
@@ -71,51 +80,72 @@ const Signin: NextPage = () => {
         <title>ورود به فروشگاه</title>
       </Head>
 
-      <main className="bg-dark dark:bg-slate-900 dark:text-white min-h-screen flex flex-col gap-8 justify-center items-center">
-        <Link href="/">
-          <h1 className="text-2xl cursor-pointer">فروشگاه</h1>
-        </Link>
+      <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-10 dark:bg-slate-950">
+        <div className="flex w-full max-w-md flex-col gap-6">
+          {/* LOGO */}
+          <Link
+            href="/"
+            className="text-center text-3xl font-extrabold text-orange-500"
+          >
+            فروشگاه
+          </Link>
 
-        <div className="bg-white dark:bg-slate-900 dark:border dark:border-slate-700 shadow-sm rounded-2xl py-6 px-12 flex flex-col w-11/12 md:w-[32rem] gap-4">
-          <h1 className="md:text-2xl text-lg text-center text-gray-500 dark:text-white">
-            ورود
-          </h1>
+          {/* CARD */}
+          <div className="rounded-3xl border border-gray-100 bg-white p-8 shadow-xl shadow-gray-100 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/20">
+            <div className="mb-6 text-center">
+              <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+                ورود به حساب
+              </h1>
+              <p className="mt-2 text-sm text-gray-400">خوش برگشتی 👋</p>
+            </div>
 
-          <ImageButton src={google.src} value="ورود با گوگل" />
+            <div className="mb-5 w-full">
+              <ImageButton
+                style={{ width: "100%", justifyContent: "center" }}
+                src={google.src}
+                value="ورود با گوگل"
+              />
+            </div>
 
-          <Divider text="یا ورود به حساب با" />
+            <Divider text="یا ورود با ایمیل" />
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-            <Input
-              data="email"
-              label="ایمیل"
-              value={form.email}
-              onChange={(e) => handleChange("email", e.target.value)}
-              jsx={null}
-            />
+            <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-5">
+              <Input
+                data="email"
+                type="email"
+                label="ایمیل"
+                value={form.email}
+                onChange={(e) => handleChange("email", e.target.value)}
+              />
+              <Input
+                data="password"
+                type="password"
+                label="رمز عبور"
+                value={form.password}
+                onChange={(e) => handleChange("password", e.target.value)}
+              />
 
-            <Input
-              data="password"
-              label="پسورد"
-              value={form.password}
-              onChange={(e) => handleChange("password", e.target.value)}
-              jsx={<EyeIcon />}
-            />
+              <button
+                type="submit"
+                disabled={loading}
+                className="mt-2 h-12 rounded-xl bg-orange-500 font-medium text-white transition-all duration-200 hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loading ? "در حال ورود..." : "ورود به حساب"}
+              </button>
+            </form>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-blue-500 hover:bg-white p-2 rounded-md text-white hover:border-blue-600 border hover:text-blue-600 disabled:opacity-50"
-            >
-              {loading ? "در حال ورود..." : "ورود"}
-            </button>
-          </form>
-          {/* 
-          <AuthFooter
-            text="آیا قبلا ثبت نام نکرده اید؟"
-            link="/Auth/Signup"
-            linkText="ثبت نام"
-          /> */}
+            <div className="mt-8 border-t border-gray-100 pt-5 text-center dark:border-slate-800">
+              <p className="text-sm text-gray-500 dark:text-slate-400">
+                هنوز حساب کاربری ندارید؟
+              </p>
+              <Link
+                href="/Auth/Signup"
+                className="mt-3 inline-flex items-center justify-center rounded-xl border border-orange-200 px-5 py-2 text-sm font-medium text-orange-500 transition-all duration-200 hover:bg-orange-50 dark:border-orange-900 dark:text-orange-400 dark:hover:bg-orange-950/40"
+              >
+                ثبت نام در سایت
+              </Link>
+            </div>
+          </div>
         </div>
       </main>
     </>
