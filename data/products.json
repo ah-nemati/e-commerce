@@ -8,7 +8,7 @@
     },
     "image": {
       "url": [
-        "https://dkstatics-public.digikala.com/digikala-products/3049dd8c073305e494f86d2959ac679febba7467_1627981167.jpg?x-oss-process=image/resize,m_lfit,h_300,w_300/quality,q_80"
+        "/uploads/3049dd8c073305e494f86d2959ac679febba7467_1627981167.jpg"
       ]
     },
     "rating": {
@@ -39,7 +39,7 @@
     "title_fa": "گوشی موبایل شیائومی مدل Redmi Note 14 4G دو سیم کارت ظرفیت 256 گیگابایت و رم 8 گیگابایت",
     "image": {
       "url": [
-        "https://dkstatics-public.digikala.com/digikala-products/c0a7ce006d11c222bce16bd3cdd8d79aeb6689bc_1738134271.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        "/uploads/c0a7ce006d11c222bce16bd3cdd8d79aeb6689bc_1738134271.jpg"
       ]
     },
     "data_layer": {
@@ -83,7 +83,7 @@
     },
     "image": {
       "url": [
-        "https://dkstatics-public.digikala.com/digikala-products/4cbc5632864107d27d2fe818e766d32be2ddceb0_1754246494.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/format,webp/quality,q_90"
+        "/uploads/4cbc5632864107d27d2fe818e766d32be2ddceb0_1754246494.webp"
       ]
     },
     "data_layer": {
@@ -95,6 +95,31 @@
       {
         "id": "1778280215512",
         "hex_code": "#161718",
+        "title": "مشکی"
+      }
+    ]
+  },
+  {
+    "id": "5bb7b5b5-7a73-4220-80b6-224cda17d619",
+    "title_fa": "لپ تاپ 15.6 اینچی لنوو مدل V15 G2 IJL-Celeron N4500-8GB DDR4 2933MHz-256GB SSD-TN",
+    "rating": {
+      "rate": 88,
+      "count": 535
+    },
+    "image": {
+      "url": [
+        "/uploads/6b3a0296-6ddc-4c53-a5b0-4eb325023fc1.webp"
+      ]
+    },
+    "data_layer": {
+      "brand": "لنوو",
+      "category": "لپ تاپ"
+    },
+    "price": 61000000,
+    "colors": [
+      {
+        "id": "1778341323643",
+        "hex_code": "#0b0c0f",
         "title": "مشکی"
       }
     ]
