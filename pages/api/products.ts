@@ -14,6 +14,7 @@ export default async function handler(
 ) {
   try {
     const products: Product[] = await readDB("products.json");
+
     const {
       search = "",
       category = "",
@@ -28,31 +29,49 @@ export default async function handler(
     let result = [...products];
 
     if (search) {
-      const q = String(search).toLowerCase();
+      const q = String(search).toLowerCase().trim();
       result = result.filter((p) => p.title_fa?.toLowerCase().includes(q));
     }
 
-    if (category) {
-      if (category === "other") {
-        result = result.filter(
-          (p) =>
-            p.data_layer?.category !== "گوشی موبایل" &&
-            p.data_layer?.category !== "لپ تاپ و الترابوک",
-        );
-      } else {
-        result = result.filter((p) => p.data_layer?.category === category);
-      }
+    if (category && String(category).trim() !== "") {
+      const cat = String(category).trim();
+
+      result = result.filter((p) => {
+        const productCat = String(p.data_layer?.category || "").trim();
+
+        if (cat === "لپ تاپ و الترابوک") {
+          return productCat.includes("لپ") || productCat.includes("لپ‌تاپ");
+        }
+
+        return productCat === cat;
+      });
     }
 
     if (brand) {
-      const brandList = String(brand).split(",").filter(Boolean);
-      result = result.filter((p) => brandList.includes(p.data_layer?.brand));
+      const brandList = String(brand)
+        .split(",")
+        .map((b) => b.trim())
+        .filter(Boolean);
+
+      if (brandList.length > 0) {
+        result = result.filter((p) =>
+          brandList.includes(String(p.data_layer?.brand || "").trim()),
+        );
+      }
     }
 
-    if (minPrice) result = result.filter((p) => p.price >= Number(minPrice));
-    if (maxPrice) result = result.filter((p) => p.price <= Number(maxPrice));
+    const minP = minPrice ? Number(minPrice) : 0;
+    const maxP = maxPrice ? Number(maxPrice) : Infinity;
+
+    if (minPrice || maxPrice) {
+      result = result.filter((p) => {
+        const price = Number(p.price);
+        return price >= minP && price <= maxP;
+      });
+    }
 
     const sorted = [...result];
+
     switch (sort) {
       case "price_asc":
         sorted.sort((a, b) => a.price - b.price);
@@ -67,22 +86,24 @@ export default async function handler(
         sorted.sort((a, b) => b.rating.count - a.rating.count);
     }
 
-    const start = (Number(page) - 1) * Number(limit);
-    const paginated = sorted.slice(start, start + Number(limit));
+    const pageNum = Number(page) || 1;
+    const limitNum = Number(limit) || 10;
+    const start = (pageNum - 1) * limitNum;
+
+    const paginated = sorted.slice(start, start + limitNum);
 
     return res.status(200).json({
       success: true,
       total: sorted.length,
       products: paginated,
-      hasMore: start + Number(limit) < sorted.length,
+      hasMore: start + limitNum < sorted.length,
+      page: pageNum,
     });
   } catch (error: any) {
     console.error("API Error:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: error.message || "Internal Server Error",
-      });
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
   }
 }

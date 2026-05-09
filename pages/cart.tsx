@@ -52,7 +52,6 @@ const Cart = () => {
 
   const totalItems = cartProduct.reduce((acc, item) => acc + item.Quantity, 0);
 
-  /* ─── Empty State ─── */
   if (cartProduct.length === 0) {
     return (
       <div
@@ -106,7 +105,6 @@ const Cart = () => {
     );
   }
 
-  /* ─── Main Cart ─── */
   return (
     <div dir="rtl" className="flex flex-col dark:text-white px-4 md:px-12 py-8">
       {/* Header */}

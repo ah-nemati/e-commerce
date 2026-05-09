@@ -5,19 +5,5 @@
     "password": "$2b$12$9KXTopHtvONJXVRMcdoDVuX2Wxt4zTo6KkANvceD.gglbSKZ9doj6",
     "role": "admin",
     "createdAt": "2026-05-09T12:14:06.371Z"
-  },
-  {
-    "id": 1778336195921,
-    "email": "asd@asd.asd",
-    "password": "$2b$12$7f1EJXHOS80BRVOwgg46UeginnyLB/5FvIPYMA1JGn0Qn35MCm.k.",
-    "role": "admin",
-    "createdAt": "2026-05-09T14:16:36.597Z"
-  },
-  {
-    "id": 1778344011417,
-    "email": "bbb@bbb.bbb",
-    "password": "$2b$12$CukWIOQCgIwgyH0PAM68WO1aOZTp1r5Oss2P9sku1l0uSlJFaqH3u",
-    "role": "user",
-    "createdAt": "2026-05-09T16:26:51.903Z"
   }
 ]
